@@ -1,0 +1,8 @@
+/* static/css/desktop.css */
+body {
+    background-image: url("/static/images/background.jpg");  /* Remplace par le chemin de ton image */
+    background-size: cover;  /* Pour que l'image couvre tout l'écran */
+    background-position: center;  /* Pour centrer l'image */
+    height: 100vh;  /* Pour que l'image couvre toute la hauteur de la fenêtre */
+    margin: 0;
+}

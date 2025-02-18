@@ -1,6 +1,6 @@
+# desktop/views.py
 from django.shortcuts import render
-from django.http import HttpResponse
 
-
-def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+def desktop_view(request):
+    # Cette vue rendra le template desktop.html
+    return render(request, 'desktop/desktop.html')

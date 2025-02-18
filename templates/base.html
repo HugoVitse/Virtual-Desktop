@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mon Bureau Virtuel{% endblock %}</title>
+
+    {% block extra_head %}
+    <!-- Tout code supplémentaire (CSS, JS) ici -->
+    {% endblock %}
+</head>
+<body>
+    <!-- Menu de navigation -->
+    <nav>
+        {% if user.is_authenticated %}
+            <p>Bienvenue, {{ user.username }} | <a href="{% url 'logout' %}">Déconnexion</a></p>
+        {% else %}
+            <a href="{% url 'login' %}">Connexion</a> | <a href="{% url 'register' %}">Inscription</a>
+        {% endif %}
+    </nav>
+
+    <!-- Contenu de la page -->
+    <div class="content">
+        {% block content %}
+        <!-- Le contenu spécifique à chaque page viendra ici -->
+        {% endblock %}
+    </div>
+
+    {% block extra_footer %}
+    <!-- Footer, JS, etc. -->
+    {% endblock %}
+</body>
+</html>

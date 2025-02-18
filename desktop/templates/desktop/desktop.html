@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %} 
+
+{% block title %}Mon Bureau Virtuel{% endblock %}
+
+{% block content %}
+    <div class="desktop">
+        <h1>Bienvenue sur ton Bureau Virtuel</h1>
+        <p>Personnalise ton expérience !</p>
+    </div>
+{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/desktop.css' %}">
+{% endblock %}
