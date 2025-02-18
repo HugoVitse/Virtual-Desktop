@@ -1,1 +1,20 @@
+virtual-desktop/
+
+# Fichiers Python compilés
+*.pyc
+*.pyo
+*.pyd
 __pycache__/
+
+
+
+
+
+
+.vscode/
+
+
+
+*.pid
+
+
