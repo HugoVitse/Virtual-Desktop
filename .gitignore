@@ -1,4 +1,4 @@
-virtual-desktop/
+venv
 
 # Fichiers Python compilés
 *.pyc
