@@ -1,0 +1,12 @@
+{% block content %}
+    <h1>Mon Bureau Virtuel</h1>
+    <p>Voici vos fichiers :</p>
+    <ul>
+        {% for file in files %}
+            <li>{{ file.name }} ({{ file.file_type }})</li>
+        {% empty %}
+            <li>Aucun fichier pour l'instant.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'upload_file' %}">Télécharger un nouveau fichier</a>
+{% endblock %}
