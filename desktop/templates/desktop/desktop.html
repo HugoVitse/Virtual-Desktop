@@ -1,26 +1,151 @@
 {% extends 'base.html' %}
-{% load static %} 
+{% load static %}
+{% load custom_filters %} 
 
 {% block title %}Mon Bureau Virtuel{% endblock %}
 
 {% block content %}
     <div class="desktop">
         {% for file in files %}
-            <div class="file-icon" onclick="openFile('{{ file.id }}')">
-                <img src="{% static 'icons/' %}{{ file.file_type }}.png" alt="{{ file.file_type }}">
-                <div class="file-name">{{ file.name }}</div>
-            </div>
+            {% if file.name|slice:":9" == "/Desktop/" %}
+                <div class="file-icon" ondblclick="openFile('{{ file.id }}')" onclick="selectIcon(this)">
+                    <img src="{% static 'icons/' %}{{ file.file_type }}.png" alt="{{ file.file_type }}">
+                    <div class="file-name">{{ file.name|basename }}</div>
+                </div>
+            {% endif %}
         {% empty %}
             <p style="color: white; text-shadow: 1px 1px 2px black;">Aucun fichier pour l'instant.</p>
         {% endfor %}
+
+        <div class="file-icon" ondblclick="openExplorer()"  onclick="selectIcon(this)">
+            <img src="{% static 'icons/explorer.png' %}" alt="Explorateur">
+            <div class="file-name">Explorateur</div>
+        </div>
+
+        <div id="explorer-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeExplorer()">&times;</span>
+                <h2>Explorateur de Fichiers</h2>
+                <button onclick="goBack()">⬅ Retour</button>
+                <div id="file-list"></div>
+            </div>
+        </div>
+        
+        <div id="image-viewer" class="modal" onclick="closeImageViewer()">
+            <span class="close">&times;</span>
+            <img id="viewer-img" class="modal-content">
+            <div id="caption"></div>
+        </div>
+        
+
     </div>
     <script>
+        function selectIcon(selectedEl) {
+            // Récupère toutes les icônes
+            const icons = document.querySelectorAll('.file-icon');
+            icons.forEach(icon => {
+                // Retire la classe active de toutes les icônes
+                if (icon !== selectedEl) {
+                    icon.classList.remove('active');
+                }
+            });
+            // Ajoute la classe active sur l'icône cliquée
+            selectedEl.classList.toggle('active');
+        }
+    </script>
+    <script>
         function openFile(fileId) {
-            alert("Ouvrir le fichier ID: " + fileId);
+
+            openImageViewer(`/desktop/file/?file_id=${encodeURIComponent(fileId)}`)
             // Ici, tu peux rediriger vers l'affichage du fichier, par exemple:
             // window.location.href = "/files/" + fileId;
         }
     </script>
+    <script>
+        let currentPath = "";  // Chemin actuel dans media/files/<user_id>/
+        
+        function openExplorer() {
+            document.getElementById("explorer-modal").style.display = "block";
+            loadFiles(""); // Charger la racine
+        }
+    
+        function closeExplorer() {
+            document.getElementById("explorer-modal").style.display = "none";
+        }
+    
+        function loadFiles(path) {
+            currentPath = path;
+            let fileList = document.getElementById("file-list");
+            fileList.innerHTML = "<p>Chargement...</p>";
+    
+            fetch(`/desktop/explorer/?path=${encodeURIComponent(path)}`)
+                .then(response => response.json())
+                .then(data => {
+                    fileList.innerHTML = "";  // Nettoie la liste
+                    if (data.error) {
+                        fileList.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                        return;
+                    }
+    
+                    // Ajouter les dossiers en premier
+                    data.folders.forEach(folder => {
+                        let div = document.createElement("div");
+                        div.className = "file-item";
+                        div.innerHTML = "📁 " + folder.name;
+                        div.onclick = () => loadFiles(folder.path); // Naviguer dans le dossier
+                        fileList.appendChild(div);
+                    });
+    
+                    // Ajouter les fichiers
+                    data.files.forEach(file => {
+                        let div = document.createElement("div");
+                        div.className = "file-item";
+                        div.innerHTML = "📄 " + file.name;
+                        div.onclick = () => openFile(file.id)
+                        fileList.appendChild(div);
+                    });
+    
+                    if (data.folders.length === 0 && data.files.length === 0) {
+                        fileList.innerHTML = "<p>Aucun fichier ni dossier.</p>";
+                    }
+                })
+                .catch(error => {
+                    console.error("Erreur:", error);
+                    fileList.innerHTML = "<p style='color: red;'>Erreur de chargement.</p>";
+                });
+        }
+    
+        function goBack() {
+            if (currentPath === "") return; // On est déjà à la racine
+    
+            let parts = currentPath.split("/").filter(p => p);
+            parts.pop(); // Retirer le dernier dossier
+            let newPath = parts.join("/");
+            loadFiles(newPath); // Charger le nouveau chemin
+        }
+    </script>
+    <script>
+        function openImageViewer(imageUrl, fileName) {
+            let viewer = document.getElementById("image-viewer");
+            let viewerImg = document.getElementById("viewer-img");
+            
+    
+            viewer.style.display = "block";  // Afficher la visionneuse
+            fetch(imageUrl)
+                .then(response => response.json())
+                .then(data => {
+                    viewerImg.src = `data:image/png;base64,${data.file_data}`;
+                })
+    
+        }
+    
+        function closeImageViewer() {
+            document.getElementById("image-viewer").style.display = "none";
+        }
+    </script>
+    
+
+
 
 {% endblock %}
 
