@@ -6,7 +6,7 @@ body {
     flex-wrap: wrap;
     align-items: flex-start;
     justify-content: flex-start;
-    height: 100vh;
+    height: 100vh;  
     overflow: hidden;
 }
 
@@ -24,6 +24,7 @@ body {
     cursor: pointer;
     display: inline-block;
 }
+
 
 .file-icon img {
     width: 64px;
