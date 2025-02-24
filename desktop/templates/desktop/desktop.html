@@ -5,11 +5,31 @@
 
 {% block content %}
     <div class="desktop">
-        <h1>Bienvenue sur ton Bureau Virtuel</h1>
-        <p>Personnalise ton expérience !</p>
+        {% for file in files %}
+            <div class="file-icon" onclick="openFile('{{ file.id }}')">
+                <img src="{% static 'icons/' %}{{ file.file_type }}.png" alt="{{ file.file_type }}">
+                <div class="file-name">{{ file.name }}</div>
+            </div>
+        {% empty %}
+            <p style="color: white; text-shadow: 1px 1px 2px black;">Aucun fichier pour l'instant.</p>
+        {% endfor %}
     </div>
+    <script>
+        function openFile(fileId) {
+            alert("Ouvrir le fichier ID: " + fileId);
+            // Ici, tu peux rediriger vers l'affichage du fichier, par exemple:
+            // window.location.href = "/files/" + fileId;
+        }
+    </script>
+
 {% endblock %}
 
 {% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/desktop.css' %}">
 {% endblock %}
+
+
+
+
+
+
