@@ -132,3 +132,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# settings.py
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Par défaut
+# ou pour utiliser un cache :
+# SESSION_ENGINE = 'django.contrib.sessions.backends.cache'

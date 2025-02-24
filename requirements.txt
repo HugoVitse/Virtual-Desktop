@@ -6,3 +6,4 @@ platformdirs==4.3.6
 sqlparse==0.5.3
 virtualenv==20.26.6
 pillow==9.0.0
+gradio_client==latest_version
