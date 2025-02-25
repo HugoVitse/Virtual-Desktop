@@ -1,7 +1,15 @@
 {% extends 'base.html' %}
-{% load static %} 
+{% load static %}
 
 {% block title %}Mon Bureau Virtuel{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/desktop.css' %}">
+
+{% endblock %}
 
 {% block content %}
     <div class="desktop">
@@ -11,25 +19,258 @@
                 <div class="file-name">{{ file.name }}</div>
             </div>
         {% empty %}
-            <p style="color: white; text-shadow: 1px 1px 2px black;">Aucun fichier pour l'instant.</p>
+            <p class="no-files">Aucun fichier pour l'instant.</p>
         {% endfor %}
+        
+         <!-- Icône pour afficher ou masquer l'Ordre du Jour -->
+         <div>
+            <img src="{% static 'icons/ordre-du-jour.png' %}" alt="Ordre du jour" class="order-icon" onclick="toggleAgenda()">
+        </div>
+        
+        <!-- Section Agenda -->
+        <div id="agenda-content" class="agenda-content {% if show_agenda %}show{% endif %}">
+            <div class="agenda-header">
+                Ordre du Jour
+            </div>
+            <div class="agenda-content-inner">
+                 <!-- Formulaire pour ajouter une tâche -->
+                    <div class="add-task-form">
+                        <h3>Ajouter une nouvelle tâche</h3>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="text" name="title" placeholder="Titre de la tâche" required>
+                            <textarea name="description" placeholder="Description de la tâche" required></textarea>
+                            <input type="datetime-local" name="due_date" required>
+                            <button type="submit" name="add_task">Ajouter</button>
+                        </form>
+                    </div>
+
+                    <!-- Affichage des tâches -->
+                    <div class="task-container">
+                        {% if tasks %}
+                            {% for task in tasks %}
+                            <div class="task">
+                                <div class="task-details">
+                                    <div class="task-title">{{ task.title }}</div>
+                                    <div class="task-description">{{ task.description }}</div>
+                                    <div class="task-due-date">Due: {{ task.due_date|date:"d M Y, H:i" }}</div>
+                                </div>
+                                <div class="task-actions">
+                                    <form method="POST" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="task_id" value="{{ task.id }}">
+                                        <button type="submit" name="delete_task">Supprimer</button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>Aucune tâche pour l'instant.</p>
+                        {% endif %}
+                    </div>
+            </div>
+            <button onclick="closeAgenda()">Fermer</button>
+        </div>
+
+
     </div>
-    <script>
-        function openFile(fileId) {
-            alert("Ouvrir le fichier ID: " + fileId);
-            // Ici, tu peux rediriger vers l'affichage du fichier, par exemple:
-            // window.location.href = "/files/" + fileId;
+
+    <!-- Barre des tâches -->
+    <div class="taskbar">
+        <div class="taskbar-left">
+            <div class="start-menu" onclick="toggleStartMenu()">
+                <img src="{% static 'icons/start.png' %}" alt="Start" class="start-icon"> Démarrer
+            </div>
+        </div>
+
+        <div class="taskbar-center">
+            <div class="taskbar-clock" id="clock">{{ current_time }}</div> <!-- Heure dynamique -->
+        </div>
+
+        <div class="taskbar-right">
+            <div class="taskbar-agenda" onclick="toggleCalendar()">
+                <img src="{% static 'icons/agenda.png' %}" alt="Agenda" class="agenda-icon">
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Démarrer -->
+    <div id="start-menu-content" class="start-menu-content hidden">
+        <ul>
+            {% for item in menu_items %}
+                <li><a href="{{ item.link }}">{{ item.icon }} {{ item.label }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Section Météo -->
+    <div id="weather-widget" class="weather-widget" onclick="redirectToWeatherPage()">
+        <div class="weather-info">
+            <div id="weather-location"></div>
+            <div id="weather-temperature"></div>
+        </div>
+        <div id="weather-icon"></div>
+    </div>
+
+    <!-- Affichage du calendrier -->
+    <div id="calendar-modal" class="calendar-modal">
+        <div class="calendar-container">
+            <button class="close-btn" onclick="closeCalendar()">X</button>
+            <div id="calendar" class="calendar"></div>
+        </div>
+    </div>
+
+<script>
+    let currentMonth = moment(); // Initialiser le mois courant avec Moment.js
+
+    // Fonction pour changer de mois (précédent ou suivant)
+    function changeMonth(direction) {
+        currentMonth.add(direction, 'months');  // Ajouter ou soustraire un mois en fonction de la direction
+        generateCalendar();  // Regénérer le calendrier avec le nouveau mois
+    }
+
+    // Générer un calendrier
+    function generateCalendar() {
+        const month = currentMonth.month(); // Mois actuel
+        const year = currentMonth.year(); // Année actuelle
+        const today = moment(); // Récupérer la date d'aujourd'hui
+
+        let calendarHTML = `<div class="calendar-header">
+            <button onclick="changeMonth(-1)">❮</button> <!-- Flèche précédente -->
+            <span>${currentMonth.format('MMMM YYYY')}</span>
+            <button onclick="changeMonth(1)">❯</button> <!-- Flèche suivante -->
+        </div>`;
+
+        const daysOfWeek = ["D", "L", "M", "M", "J", "V", "S"];
+        calendarHTML += "<div class='calendar-days'>";
+        for (let day of daysOfWeek) {
+            calendarHTML += `<div class='calendar-day-header'>${day}</div>`;
         }
-    </script>
+        calendarHTML += "</div>";
+
+        const startOfMonth = moment([year, month]).startOf('month');
+        const endOfMonth = moment([year, month]).endOf('month');
+        const startDay = startOfMonth.day();
+        const totalDays = endOfMonth.date();
+
+        let dayCounter = 1;
+        let calendarRows = [];
+
+        // Créer une ligne de jours
+        let rowHTML = "<div class='calendar-row'>";
+        for (let col = 0; col < startDay; col++) {
+            rowHTML += "<div class='calendar-day'></div>"; // Jour vide avant début du mois
+        }
+
+        for (let col = startDay; col < 7; col++) {
+            if (dayCounter <= totalDays) {
+                let dayClass = ''; 
+                if (today.date() === dayCounter && today.month() === month && today.year() === year) {
+                    dayClass = 'current-day'; // Ajouter la classe pour le jour actuel
+                }
+                rowHTML += `<div class='calendar-day ${dayClass}'>${dayCounter}</div>`;
+                dayCounter++;
+            }
+        }
+        rowHTML += "</div>"; // Fin de la première ligne
+        calendarRows.push(rowHTML);
+
+        // Créer les lignes suivantes
+        while (dayCounter <= totalDays) {
+            let rowHTML = "<div class='calendar-row'>";
+            for (let col = 0; col < 7; col++) {
+                if (dayCounter <= totalDays) {
+                    let dayClass = ''; 
+                    if (today.date() === dayCounter && today.month() === month && today.year() === year) {
+                        dayClass = 'current-day'; // Ajouter la classe pour le jour actuel
+                    }
+                    rowHTML += `<div class='calendar-day ${dayClass}'>${dayCounter}</div>`;
+                    dayCounter++;
+                } else {
+                    rowHTML += "<div class='calendar-day'></div>"; // Jour vide après fin du mois
+                }
+            }
+            rowHTML += "</div>";
+            calendarRows.push(rowHTML);
+        }
+
+        calendarHTML += `<div class="calendar-month">${calendarRows.join('')}</div>`;
+
+        document.getElementById('calendar').innerHTML = calendarHTML;
+    }
+
+    // Mettre à jour l'heure
+    function updateClock() {
+        const now = new Date();
+        document.getElementById("clock").innerText = now.toLocaleTimeString();
+    }
+
+    // Toggle le calendrier (ouvrir/fermer)
+    function toggleCalendar() {
+        const modal = document.getElementById('calendar-modal');
+        modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+    }
+
+    // Fermer le calendrier
+    function closeCalendar() {
+        const modal = document.getElementById('calendar-modal');
+        modal.style.display = 'none';
+    }
+
+    // Remplacer par l'URL de la ville Lille (ID OpenWeatherMap)
+    const cityId = 2998324; // Lille
+
+    // Fonction pour rediriger vers la page OpenWeatherMap de la ville
+    function redirectToWeatherPage() {
+        window.location.href = `https://openweathermap.org/city/${cityId}`;
+    }
+
+    // Fonction pour récupérer la météo
+    function fetchWeather() {
+        const apiKey = '775c99556f38bba0056e96bebd1643d1'; // Remplacer par votre propre clé API
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=50.6292&lon=3.0573&appid=${apiKey}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const location = data.name;
+                // Convertir la température de Kelvin à Celsius
+                const temperatureInCelsius = Math.round(data.main.temp - 273.15); 
+                const icon = `http://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
+
+                // Mettre à jour les informations du widget
+                document.getElementById('weather-location').innerText = location;
+                document.getElementById('weather-temperature').innerText = `${temperatureInCelsius}°C`; // Afficher en °C
+                document.getElementById('weather-icon').style.backgroundImage = `url(${icon})`;
+            })
+            .catch(error => {
+                console.error('Erreur de récupération de la météo:', error);
+                document.getElementById('weather-widget').innerText = 'Météo indisponible';
+            });
+    }
+
+    // Appeler la fonction pour récupérer la météo au chargement de la page
+    fetchWeather();
+
+    // Mettre à jour la météo toutes les heures
+    setInterval(fetchWeather, 3600000); // 3600000 ms = 1 heure
+
+    // Initialiser l'heure et le calendrier
+    setInterval(updateClock, 1000);
+    updateClock();
+    generateCalendar(); // Générer le calendrier au chargement
+
+    // Fonction pour afficher/masquer l'agenda
+    function toggleAgenda() {
+        const agendaContent = document.getElementById('agenda-content');
+        agendaContent.classList.toggle('show');  // Toggle la classe 'show' pour afficher ou masquer
+    }
+
+    // Fonction pour fermer l'agenda
+    function closeAgenda() {
+        const agendaContent = document.getElementById('agenda-content');
+        agendaContent.classList.remove('show');  // Retirer la classe 'show' pour masquer l'agenda
+    }
+</script>
 
 {% endblock %}
-
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/desktop.css' %}">
-{% endblock %}
-
-
-
-
-
-

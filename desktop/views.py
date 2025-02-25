@@ -1,11 +1,17 @@
-# desktop/views.py
 from django.shortcuts import render
-from files.models import File
 from django.contrib.auth.decorators import login_required
-
+from datetime import datetime
 
 @login_required
 def desktop_view(request):
-    # Cette vue rendra le template desktop.html
-    files = File.objects.filter(user_id=request.user.id)  # Afficher uniquement les fichiers de l'utilisateur connecté
-    return render(request, 'desktop/desktop.html', {'files': files})
+    # On peut également ajouter d'autres éléments dynamiques ici, comme des notifications, etc.
+    current_time = datetime.now().strftime("%H:%M:%S")  # Obtenir l'heure actuelle
+    show_agenda = request.GET.get('show_agenda', 'false') == 'true'
+
+
+    context = {
+        "current_time": current_time,
+        'show_agenda': show_agenda,
+    }
+    
+    return render(request, 'desktop/desktop.html', context)

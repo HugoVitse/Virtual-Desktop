@@ -1,4 +1,3 @@
-
 body {
     background: url('/static/images/background2.jpg') no-repeat center center fixed;
     background-size: cover;
@@ -25,7 +24,6 @@ body {
     display: inline-block;
 }
 
-
 .file-icon img {
     width: 64px;
     height: 64px;
@@ -42,4 +40,504 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     width: 80px;
+}
+
+/* Barre des tâches */
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    width: 95%;
+    height: 70px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(15px); /* Flou amélioré pour un effet de vitre */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px; /* Espacement latéral */
+    box-shadow: 0px -4px 15px rgba(0, 0, 0, 0.5);
+    border-top: 2px solid rgba(255, 255, 255, 0.3); /* Ligne de séparation plus nette */
+    z-index: 1000;
+    border-radius: 10px 10px 0 0;
+}
+
+/* Alignement des éléments dans la barre des tâches */
+.taskbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.taskbar-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1; /* L'heure prend tout l'espace central */
+}
+
+.taskbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Menu Démarrer */
+.start-menu {
+    color: white;
+    cursor: pointer;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.start-menu:hover {
+    background: rgba(0, 0, 0, 0.85); /* Sombre davantage lors du survol */
+}
+
+.start-icon {
+    width: 28px;
+    height: 28px;
+    transition: transform 0.3s ease;
+}
+
+.start-menu:hover .start-icon {
+    transform: rotate(90deg); /* Icône animée au survol */
+}
+
+/* Horloge */
+.taskbar-clock {
+    color: #00eaff;
+    font-size: 20px;
+    font-weight: bold;
+    text-shadow: 0 0 10px #00eaff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Section Agenda dans la barre des tâches */
+.taskbar-agenda {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 8px 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.taskbar-agenda:hover {
+    background: rgba(0, 0, 0, 0.7);
+    transform: scale(1.05);
+}
+
+.agenda-icon {
+    width: 30px;
+    height: 30px;
+}
+
+.agenda-info {
+    color: white;
+}
+
+.event-time {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.event-title {
+    font-size: 14px;
+    color: #fff;
+}
+
+.event-description {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Nouveau style du menu Démarrer */
+.start-menu-content {
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    width: 250px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 15px;
+    display: none;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.start-menu-content.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.start-menu-content ul {
+    list-style: none;
+    padding: 0;
+}
+
+.start-menu-content ul li {
+    padding: 10px;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.start-menu-content ul li:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Styles pour le calendrier dans le coin inférieur droit */
+.calendar-modal {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    display: none;
+    width: 250px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Styles de base */
+.calendar-modal {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    width: 300px;
+    display: none; /* Cacher par défaut */
+}
+
+.calendar-container {
+    position: relative;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.calendar-days {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.calendar-day-header {
+    width: 40px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.calendar-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.calendar-day {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 5px;
+    margin: 2px;
+    cursor: pointer;
+}
+
+.calendar-day:hover {
+    background-color: #f0f0f0;
+}
+
+.calendar-month {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+/* Styles pour les boutons */
+button {
+    background-color: transparent;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.calendar-event {
+    background-color: #4CAF50;
+    color: white;
+    font-size: 12px;
+    padding: 5px;
+    margin-top: 5px;
+    border-radius: 3px;
+}
+
+.calendar-modal {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.calendar-day {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.calendar-day.current-day {
+    background-color: #add8e6;
+    font-weight: bold;
+}
+
+
+
+/* Widget Météo */
+.weather-widget {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(28, 88, 177, 0.7);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 180px;
+    z-index: 999;
+}
+
+.weather-info {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+#weather-location {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#weather-temperature {
+    font-size: 14px;
+    color: #00eaff;
+}
+
+#weather-icon {
+    width: 40px;
+    height: 40px;
+    background-size: cover;
+    background-position: center;
+}
+
+.order-icon {
+    width: 15%;  
+    height: auto;
+    cursor: pointer; 
+}
+
+
+.content {
+    padding: 20px;
+}
+
+/* Menu */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    margin-bottom: 10px;
+}
+
+/* Cacher le contenu de l'Ordre du jour par défaut */
+#agenda-content {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    z-index: 9999;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Lorsque l'Ordre du jour est affiché */
+#agenda-content.show {
+    display: block;
+    opacity: 1;
+}
+
+/* Contenu de l'Ordre du jour */
+.agenda-header {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.agenda-content {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+}
+
+/* Menu flottant pour l'Ordre du jour */
+.order-container {
+    margin-top: 20px;
+}
+
+.order-icon.active {
+    transform: scale(1.1); /* Ajout d'un effet d'agrandissement sur l'icône */
+    transition: transform 0.3s ease;
+}
+
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .task-container {
+            margin-top: 20px;
+        }
+
+        .task {
+            background-color: #fafafa;
+            border-radius: 5px;
+            margin: 10px 0;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-title {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .task-description {
+            font-size: 1em;
+            margin-top: 5px;
+        }
+
+        .task-actions button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+
+        .task-actions button:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Ajout du formulaire pour ajouter une tâche */
+        .add-task-form {
+            margin-top: 20px;
+        }
+
+        .add-task-form input, .add-task-form textarea, .add-task-form button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .add-task-form button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .add-task-form button:hover {
+            background-color: #45a049;
+}
+
+/* Style général pour les tâches */
+.task-container {
+    margin-top: 20px;
+}
+
+.task {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+}
+
+.task-title {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.task-description {
+    font-size: 14px;
+    color: #555;
+    margin-top: 5px;
+}
+
+.task-due-date {
+    font-size: 12px;
+    color: #888;
+    margin-top: 5px;
+}
+
+.task-actions button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.task-actions button:hover {
+    background-color: #c0392b;
 }
