@@ -8,7 +8,7 @@
     <div class="desktop">
         {% for file in files %}
             {% if file.name|slice:":9" == "/Desktop/" %}
-                <div class="file-icon" ondblclick="openFile('{{ file.id }}')" onclick="selectIcon(this)">
+                <div class="file-icon" ondblclick="openFile('{{ file.id }}','{{ file.file_type }}')" onclick="selectIcon(this)">
                     <img src="{% static 'icons/' %}{{ file.file_type }}.png" alt="{{ file.file_type }}">
                     <div class="file-name">{{ file.name|basename }}</div>
                 </div>
@@ -31,12 +31,27 @@
             </div>
         </div>
         
-        <div id="image-viewer" class="modal" onclick="closeImageViewer()">
-            <span class="close">&times;</span>
+        <div id="image-viewer" class="modal">
+            <span class="close" onclick="closeImageViewer()">&times;</span>
             <img id="viewer-img" class="modal-content">
-            <div id="caption"></div>
         </div>
-        
+
+        <div id="text-editor" class="modal">
+            <div class="modal-content" style="display: flex; flex-direction: column; height: 100%;padding:0;">
+                <span class="close" onclick="openPopup()" style="align-self: flex-end;">&times;</span>
+                <textarea id="edit-text" style="flex-grow: 1; resize: none;"></textarea>
+                <button id='save-button' onclick="" style="align-self: flex-end; margin-top: 10px;">Enregistrer</button>
+            </div>
+        </div>
+
+        <div id="popup" class="modal">
+            <span class="close" onclick="closePopup()">&times;</span>
+            <p id="warning" class="modal-content">Enregisrer avant de quitter ?</p>
+            <div style="position: absolute; bottom: 10px; right: 10px;">
+                <button onclick="closePopup();closeTextEditor()">Quitter</button>
+                <button id='save-button-popup' onclick="">Enregistrer</button>
+            </div>
+        </div>
 
     </div>
     <script>
@@ -54,11 +69,13 @@
         }
     </script>
     <script>
-        function openFile(fileId) {
+        function openFile(fileId, fileType) {
+            if (fileType === "img") {
+                openImageViewer(`/desktop/file/?file_id=${encodeURIComponent(fileId)}`);
+            } else if (fileType === "txt") {
+                openTextEditor(`/desktop/file/?file_id=${encodeURIComponent(fileId)}`, fileId);
+            }
 
-            openImageViewer(`/desktop/file/?file_id=${encodeURIComponent(fileId)}`)
-            // Ici, tu peux rediriger vers l'affichage du fichier, par exemple:
-            // window.location.href = "/files/" + fileId;
         }
     </script>
     <script>
@@ -101,7 +118,7 @@
                         let div = document.createElement("div");
                         div.className = "file-item";
                         div.innerHTML = "📄 " + file.name;
-                        div.onclick = () => openFile(file.id)
+                        div.onclick = () => openFile(file.id, file.type)
                         fileList.appendChild(div);
                     });
     
@@ -141,6 +158,63 @@
     
         function closeImageViewer() {
             document.getElementById("image-viewer").style.display = "none";
+        }
+    </script>
+
+    <script>
+        function openTextEditor(textUrl, fileId) {
+            let textEditor = document.getElementById("text-editor");
+            let editText = document.getElementById("edit-text");
+            let buttonSave = document.getElementById("save-button");
+            let buttonSavePopup  = document.getElementById("save-button-popup");
+
+
+            buttonSave.setAttribute("onclick",`saveText(${fileId})`);
+            buttonSavePopup.setAttribute("onclick",`saveText(${fileId})`);
+
+            textEditor.style.display = "block";  // Afficher la visionneuse
+            fetch(textUrl)
+                .then(response => response.json())
+                .then(data => {
+                    editText.innerText = data.file_data;
+                })
+
+        }
+
+        function closeTextEditor() {
+            document.getElementById("text-editor").style.display = "none";
+        }
+
+        function saveText(fileId) {
+           
+            let editText = document.getElementById("edit-text").value;
+
+            fetch('/files/update/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}' // Assurez-vous que le token CSRF est inclus
+                },
+                body: new URLSearchParams({
+                    file_id: fileId,
+                    data: editText
+                })
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors de l\'enregistrement du fichier.');
+            });
+            closeTextEditor();
+            closePopup();
+        }
+
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+
+        }
+
+        function openPopup() {
+            document.getElementById("popup").style.display = "block";
         }
     </script>
     

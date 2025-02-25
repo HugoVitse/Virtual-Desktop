@@ -95,10 +95,30 @@ body {
 
 
 
-
+#text-editor{
+    padding:20px;
+}
 
 #viewer-img {
     width:80%;
     margin: 0 auto;
     display: block;
+}
+
+
+#edit-text {
+    width: 100%;
+    height: 80%;
+    border: none;
+}
+
+
+#edit-text:focus {
+    outline: none;
+}
+
+#popup { 
+    border : 2px solid gray;
+    width:30%;
+    height:20%;
 }

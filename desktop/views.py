@@ -62,9 +62,11 @@ def list_directory(request):
             try:
                 file_obj = File.objects.get(file=os.path.join('files', str(user_id), relative_path))
                 file_id = file_obj.id
+                file_type = 'img' if item.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')) else 'txt' if item.lower().endswith('.txt') else 'other'
             except File.DoesNotExist:
                 file_id = None
-            files.append({'name': item, 'path': relative_path, 'is_dir': False, 'id': file_id})
+                file_type = 'other'
+            files.append({'name': item, 'path': relative_path, 'is_dir': False, 'id': file_id, 'type': file_type})
 
     return JsonResponse({'folders': folders, 'files': files})
 

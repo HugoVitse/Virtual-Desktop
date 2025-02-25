@@ -20,3 +20,17 @@ def upload_file(request):
 def file_view(request):
     files = File.objects.filter(user_id=request.user.id)  # Afficher uniquement les fichiers de l'utilisateur connecté
     return render(request, 'files/file_view.html', {'files': files})
+
+
+@login_required
+def update_file(request):
+    if request.method == 'POST':
+        data = request.POST.get('data')
+        file_id = request.POST.get('file_id')
+        file = File.objects.get(id=file_id, user_id=request.user.id)
+
+        if not file.file_type == 'txt':
+            return render(request, 'files/error.html', {'message': 'Only .txt files can be updated.'})
+        with open(f'media/{file.file}', 'w') as f:
+            f.write(data)
+        return redirect('desktop')
