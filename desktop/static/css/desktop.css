@@ -337,6 +337,7 @@ button {
     align-items: center;
     width: 180px;
     z-index: 999;
+    cursor: pointer;
 }
 
 .weather-info {
@@ -365,15 +366,18 @@ button {
 .order-icon {
     width: 15%;  
     height: auto;
-    cursor: pointer; 
+    cursor: pointer;
+    transition: transform 0.3s ease;
 }
 
+.order-icon:hover {
+    transform: scale(1.1);
+}
 
 .content {
     padding: 20px;
 }
 
-/* Menu */
 ul {
     list-style-type: none;
     padding: 0;
@@ -383,7 +387,6 @@ ul li {
     margin-bottom: 10px;
 }
 
-/* Cacher le contenu de l'Ordre du jour par défaut */
 #agenda-content {
     display: none;
     position: fixed;
@@ -391,26 +394,28 @@ ul li {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: white;
+    background: rgba(255, 255, 255, 0.9);
     z-index: 9999;
-    padding: 20px;
+    padding: 40px;
     box-sizing: border-box;
     overflow-y: auto;
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s ease;
+    backdrop-filter: blur(8px);
 }
 
-/* Lorsque l'Ordre du jour est affiché */
 #agenda-content.show {
     display: block;
     opacity: 1;
 }
 
-/* Contenu de l'Ordre du jour */
 .agenda-header {
-    font-size: 2em;
-    margin-bottom: 20px;
+    font-size: 2.5em;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
 }
 
 .agenda-content {
@@ -418,108 +423,30 @@ ul li {
     margin-bottom: 30px;
 }
 
-/* Menu flottant pour l'Ordre du jour */
 .order-container {
     margin-top: 20px;
 }
 
-.order-icon.active {
-    transform: scale(1.1); /* Ajout d'un effet d'agrandissement sur l'icône */
-    transition: transform 0.3s ease;
-}
-
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        .task-container {
-            margin-top: 20px;
-        }
-
-        .task {
-            background-color: #fafafa;
-            border-radius: 5px;
-            margin: 10px 0;
-            padding: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .task-title {
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-
-        .task-description {
-            font-size: 1em;
-            margin-top: 5px;
-        }
-
-        .task-actions button {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 3px;
-            margin-left: 10px;
-        }
-
-        .task-actions button:hover {
-            background-color: #d32f2f;
-        }
-
-        /* Ajout du formulaire pour ajouter une tâche */
-        .add-task-form {
-            margin-top: 20px;
-        }
-
-        .add-task-form input, .add-task-form textarea, .add-task-form button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-
-        .add-task-form button {
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        .add-task-form button:hover {
-            background-color: #45a049;
-}
-
-/* Style général pour les tâches */
-.task-container {
-    margin-top: 20px;
-}
-
 .task {
-    background-color: #f9f9f9;
-    border-radius: 8px;
+    background-color: #ffffff;
+    border-radius: 10px;
     padding: 15px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
 .task-title {
     font-weight: bold;
-    font-size: 16px;
+    font-size: 18px;
+    color: #333;
 }
 
 .task-description {
     font-size: 14px;
-    color: #555;
+    color: #666;
     margin-top: 5px;
 }
 
@@ -530,14 +457,75 @@ ul li {
 }
 
 .task-actions button {
-    background-color: #e74c3c;
+    background-color: #ff6b6b;
     color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 8px 12px;
     border-radius: 5px;
+    font-size: 14px;
     cursor: pointer;
+    transition: background 0.3s ease;
 }
 
 .task-actions button:hover {
-    background-color: #c0392b;
+    background-color: #e63946;
+}
+
+.add-task-form {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.add-task-form h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.add-task-form input,
+.add-task-form textarea,
+.add-task-form button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.add-task-form button {
+    background-color: #4caf50;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.add-task-form button:hover {
+    background-color: #45a049;
+}
+
+.close-icon {
+    width: 25px;
+    height: auto;
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    transition: transform 0.3s ease;
+}
+
+.close-icon:hover, .close1-icon:hover {
+    transform: scale(1.2);
+}
+
+.close1-icon {
+    width: 20px;
+    height: auto;
+    cursor: pointer;
+    position: absolute;
+    right: 50px;
+    transition: transform 0.3s ease;
 }

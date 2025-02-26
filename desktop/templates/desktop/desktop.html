@@ -29,6 +29,7 @@
         
         <!-- Section Agenda -->
         <div id="agenda-content" class="agenda-content {% if show_agenda %}show{% endif %}">
+            <img src="{% static 'icons/proche.png' %}" alt="Fermer" class="close-icon" onclick="closeAgenda()">
             <div class="agenda-header">
                 Ordre du Jour
             </div>
@@ -56,7 +57,7 @@
                                     <div class="task-due-date">Due: {{ task.due_date|date:"d M Y, H:i" }}</div>
                                 </div>
                                 <div class="task-actions">
-                                    <form method="POST" style="display: inline;">
+                                    <form method="POST">
                                         {% csrf_token %}
                                         <input type="hidden" name="task_id" value="{{ task.id }}">
                                         <button type="submit" name="delete_task">Supprimer</button>
@@ -69,10 +70,7 @@
                         {% endif %}
                     </div>
             </div>
-            <button onclick="closeAgenda()">Fermer</button>
         </div>
-
-
     </div>
 
     <!-- Barre des tâches -->
@@ -115,10 +113,11 @@
     <!-- Affichage du calendrier -->
     <div id="calendar-modal" class="calendar-modal">
         <div class="calendar-container">
-            <button class="close-btn" onclick="closeCalendar()">X</button>
+            <img src="{% static 'icons/proche.png' %}" alt="Fermer" class="close1-icon" onclick="closeCalendar()">
             <div id="calendar" class="calendar"></div>
         </div>
     </div>
+
 
 <script>
     let currentMonth = moment(); // Initialiser le mois courant avec Moment.js
@@ -226,31 +225,37 @@
     }
 
     // Fonction pour récupérer la météo
+    // Fonction pour récupérer la météo
     function fetchWeather() {
-        const apiKey = '775c99556f38bba0056e96bebd1643d1'; // Remplacer par votre propre clé API
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=50.6292&lon=3.0573&appid=${apiKey}`;
-
+        const apiKey = '775c99556f38bba0056e96bebd1643d1'; // Remplace par ta propre clé API
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=50.6292&lon=3.0573&appid=${apiKey}&units=metric&lang=fr`;
+    
         fetch(url)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Problème lors de la récupération des données météo.");
+                }
+                return response.json();
+            })
             .then(data => {
                 const location = data.name;
-                // Convertir la température de Kelvin à Celsius
-                const temperatureInCelsius = Math.round(data.main.temp - 273.15); 
-                const icon = `http://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
-
-                // Mettre à jour les informations du widget
+                const temperature = Math.round(data.main.temp);
+                const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
+                const description = data.weather[0].description;
+    
+                // Vérification et mise à jour du widget
                 document.getElementById('weather-location').innerText = location;
-                document.getElementById('weather-temperature').innerText = `${temperatureInCelsius}°C`; // Afficher en °C
-                document.getElementById('weather-icon').style.backgroundImage = `url(${icon})`;
+                document.getElementById('weather-temperature').innerText = `${temperature}°C - ${description}`;
+                document.getElementById('weather-icon').innerHTML = `<img src="${iconUrl}" alt="Météo">`;
             })
             .catch(error => {
-                console.error('Erreur de récupération de la météo:', error);
-                document.getElementById('weather-widget').innerText = 'Météo indisponible';
+                console.error("Erreur lors du chargement de la météo :", error);
+                document.getElementById('weather-location').innerText = "Météo indisponible";
             });
     }
-
-    // Appeler la fonction pour récupérer la météo au chargement de la page
-    fetchWeather();
+    
+    // Appel de la fonction après le chargement de la page
+    document.addEventListener("DOMContentLoaded", fetchWeather)
 
     // Mettre à jour la météo toutes les heures
     setInterval(fetchWeather, 3600000); // 3600000 ms = 1 heure
