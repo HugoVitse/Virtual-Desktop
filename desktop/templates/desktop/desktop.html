@@ -8,6 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/desktop.css' %}">
+    <script src="path/to/your/script.js" defer></script>
+
 
 {% endblock %}
 
@@ -86,8 +88,14 @@
         </div>
 
         <div class="taskbar-right">
+            <div class="taskbar-agenda" onclick="toggleBourse()">
+                <img src="{% static 'icons/bourse.png' %}" alt="Bourse" class="agenda-icon">
+            </div>
+        </div>
+
+        <div class="taskbar-right">
             <div class="taskbar-agenda" onclick="toggleCalendar()">
-                <img src="{% static 'icons/agenda.png' %}" alt="Agenda" class="agenda-icon">
+                <img src="{% static 'icons/calendrier.png' %}" alt="Agenda" class="agenda-icon">
             </div>
         </div>
     </div>
@@ -118,66 +126,63 @@
         </div>
     </div>
 
+    <!-- Widget Bourse -->
+    <div id="bourse-modal" class="bourse-modal">
+        <div class="bourse-container">
+            <img src="{% static 'icons/proche.png' %}" alt="Fermer" class="close2-icon" onclick="closeBourse()">
+            <div class="bourse-header">Marchés Boursiers</div>
+            <div id="crypto-data" class="bourse-content">
+                <p id="loading-message">Chargement des données...</p>
+            </div>
+        </div>
+    </div>
 
-<script>
-    let currentMonth = moment(); // Initialiser le mois courant avec Moment.js
 
-    // Fonction pour changer de mois (précédent ou suivant)
-    function changeMonth(direction) {
-        currentMonth.add(direction, 'months');  // Ajouter ou soustraire un mois en fonction de la direction
-        generateCalendar();  // Regénérer le calendrier avec le nouveau mois
-    }
 
-    // Générer un calendrier
-    function generateCalendar() {
-        const month = currentMonth.month(); // Mois actuel
-        const year = currentMonth.year(); // Année actuelle
-        const today = moment(); // Récupérer la date d'aujourd'hui
 
-        let calendarHTML = `<div class="calendar-header">
-            <button onclick="changeMonth(-1)">❮</button> <!-- Flèche précédente -->
-            <span>${currentMonth.format('MMMM YYYY')}</span>
-            <button onclick="changeMonth(1)">❯</button> <!-- Flèche suivante -->
-        </div>`;
-
-        const daysOfWeek = ["D", "L", "M", "M", "J", "V", "S"];
-        calendarHTML += "<div class='calendar-days'>";
-        for (let day of daysOfWeek) {
-            calendarHTML += `<div class='calendar-day-header'>${day}</div>`;
+    <script>
+        let currentMonth = moment(); // Initialiser le mois courant avec Moment.js
+    
+        // Fonction pour changer de mois (précédent ou suivant)
+        function changeMonth(direction) {
+            currentMonth.add(direction, 'months');  // Ajouter ou soustraire un mois en fonction de la direction
+            generateCalendar();  // Regénérer le calendrier avec le nouveau mois
         }
-        calendarHTML += "</div>";
-
-        const startOfMonth = moment([year, month]).startOf('month');
-        const endOfMonth = moment([year, month]).endOf('month');
-        const startDay = startOfMonth.day();
-        const totalDays = endOfMonth.date();
-
-        let dayCounter = 1;
-        let calendarRows = [];
-
-        // Créer une ligne de jours
-        let rowHTML = "<div class='calendar-row'>";
-        for (let col = 0; col < startDay; col++) {
-            rowHTML += "<div class='calendar-day'></div>"; // Jour vide avant début du mois
-        }
-
-        for (let col = startDay; col < 7; col++) {
-            if (dayCounter <= totalDays) {
-                let dayClass = ''; 
-                if (today.date() === dayCounter && today.month() === month && today.year() === year) {
-                    dayClass = 'current-day'; // Ajouter la classe pour le jour actuel
-                }
-                rowHTML += `<div class='calendar-day ${dayClass}'>${dayCounter}</div>`;
-                dayCounter++;
+    
+        // Générer un calendrier
+        function generateCalendar() {
+            const month = currentMonth.month(); // Mois actuel
+            const year = currentMonth.year(); // Année actuelle
+            const today = moment(); // Récupérer la date d'aujourd'hui
+    
+            let calendarHTML = `<div class="calendar-header">
+                <button onclick="changeMonth(-1)">❮</button> <!-- Flèche précédente -->
+                <span>${currentMonth.format('MMMM YYYY')}</span>
+                <button onclick="changeMonth(1)">❯</button> <!-- Flèche suivante -->
+            </div>`;
+    
+            const daysOfWeek = ["D", "L", "M", "M", "J", "V", "S"];
+            calendarHTML += "<div class='calendar-days'>";
+            for (let day of daysOfWeek) {
+                calendarHTML += `<div class='calendar-day-header'>${day}</div>`;
             }
-        }
-        rowHTML += "</div>"; // Fin de la première ligne
-        calendarRows.push(rowHTML);
-
-        // Créer les lignes suivantes
-        while (dayCounter <= totalDays) {
+            calendarHTML += "</div>";
+    
+            const startOfMonth = moment([year, month]).startOf('month');
+            const endOfMonth = moment([year, month]).endOf('month');
+            const startDay = startOfMonth.day();
+            const totalDays = endOfMonth.date();
+    
+            let dayCounter = 1;
+            let calendarRows = [];
+    
+            // Créer une ligne de jours
             let rowHTML = "<div class='calendar-row'>";
-            for (let col = 0; col < 7; col++) {
+            for (let col = 0; col < startDay; col++) {
+                rowHTML += "<div class='calendar-day'></div>"; // Jour vide avant début du mois
+            }
+    
+            for (let col = startDay; col < 7; col++) {
                 if (dayCounter <= totalDays) {
                     let dayClass = ''; 
                     if (today.date() === dayCounter && today.month() === month && today.year() === year) {
@@ -185,97 +190,197 @@
                     }
                     rowHTML += `<div class='calendar-day ${dayClass}'>${dayCounter}</div>`;
                     dayCounter++;
-                } else {
-                    rowHTML += "<div class='calendar-day'></div>"; // Jour vide après fin du mois
                 }
             }
-            rowHTML += "</div>";
+            rowHTML += "</div>"; // Fin de la première ligne
             calendarRows.push(rowHTML);
-        }
-
-        calendarHTML += `<div class="calendar-month">${calendarRows.join('')}</div>`;
-
-        document.getElementById('calendar').innerHTML = calendarHTML;
-    }
-
-    // Mettre à jour l'heure
-    function updateClock() {
-        const now = new Date();
-        document.getElementById("clock").innerText = now.toLocaleTimeString();
-    }
-
-    // Toggle le calendrier (ouvrir/fermer)
-    function toggleCalendar() {
-        const modal = document.getElementById('calendar-modal');
-        modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
-    }
-
-    // Fermer le calendrier
-    function closeCalendar() {
-        const modal = document.getElementById('calendar-modal');
-        modal.style.display = 'none';
-    }
-
-    // Remplacer par l'URL de la ville Lille (ID OpenWeatherMap)
-    const cityId = 2998324; // Lille
-
-    // Fonction pour rediriger vers la page OpenWeatherMap de la ville
-    function redirectToWeatherPage() {
-        window.location.href = `https://openweathermap.org/city/${cityId}`;
-    }
-
-    // Fonction pour récupérer la météo
-    // Fonction pour récupérer la météo
-    function fetchWeather() {
-        const apiKey = '775c99556f38bba0056e96bebd1643d1'; // Remplace par ta propre clé API
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=50.6292&lon=3.0573&appid=${apiKey}&units=metric&lang=fr`;
     
-        fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Problème lors de la récupération des données météo.");
+            // Créer les lignes suivantes
+            while (dayCounter <= totalDays) {
+                let rowHTML = "<div class='calendar-row'>";
+                for (let col = 0; col < 7; col++) {
+                    if (dayCounter <= totalDays) {
+                        let dayClass = ''; 
+                        if (today.date() === dayCounter && today.month() === month && today.year() === year) {
+                            dayClass = 'current-day'; // Ajouter la classe pour le jour actuel
+                        }
+                        rowHTML += `<div class='calendar-day ${dayClass}'>${dayCounter}</div>`;
+                        dayCounter++;
+                    } else {
+                        rowHTML += "<div class='calendar-day'></div>"; // Jour vide après fin du mois
+                    }
                 }
-                return response.json();
-            })
-            .then(data => {
-                const location = data.name;
-                const temperature = Math.round(data.main.temp);
-                const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
-                const description = data.weather[0].description;
+                rowHTML += "</div>";
+                calendarRows.push(rowHTML);
+            }
     
-                // Vérification et mise à jour du widget
-                document.getElementById('weather-location').innerText = location;
-                document.getElementById('weather-temperature').innerText = `${temperature}°C - ${description}`;
-                document.getElementById('weather-icon').innerHTML = `<img src="${iconUrl}" alt="Météo">`;
-            })
-            .catch(error => {
-                console.error("Erreur lors du chargement de la météo :", error);
-                document.getElementById('weather-location').innerText = "Météo indisponible";
-            });
-    }
+            calendarHTML += `<div class="calendar-month">${calendarRows.join('')}</div>`;
     
-    // Appel de la fonction après le chargement de la page
-    document.addEventListener("DOMContentLoaded", fetchWeather)
-
-    // Mettre à jour la météo toutes les heures
-    setInterval(fetchWeather, 3600000); // 3600000 ms = 1 heure
-
-    // Initialiser l'heure et le calendrier
-    setInterval(updateClock, 1000);
-    updateClock();
-    generateCalendar(); // Générer le calendrier au chargement
-
-    // Fonction pour afficher/masquer l'agenda
-    function toggleAgenda() {
-        const agendaContent = document.getElementById('agenda-content');
-        agendaContent.classList.toggle('show');  // Toggle la classe 'show' pour afficher ou masquer
-    }
-
-    // Fonction pour fermer l'agenda
-    function closeAgenda() {
-        const agendaContent = document.getElementById('agenda-content');
-        agendaContent.classList.remove('show');  // Retirer la classe 'show' pour masquer l'agenda
-    }
-</script>
+            document.getElementById('calendar').innerHTML = calendarHTML;
+        }
+    
+        // Mettre à jour l'heure
+        function updateClock() {
+            const now = new Date();
+            document.getElementById("clock").innerText = now.toLocaleTimeString();
+        }
+    
+        // Toggle le calendrier (ouvrir/fermer)
+        function toggleCalendar() {
+            const modal = document.getElementById('calendar-modal');
+            modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+        }
+    
+        // Fermer le calendrier
+        function closeCalendar() {
+            const modal = document.getElementById('calendar-modal');
+            modal.style.display = 'none';
+        }
+    
+        // Remplacer par l'URL de la ville Lille (ID OpenWeatherMap)
+        const cityId = 2998324; // Lille
+    
+        // Fonction pour rediriger vers la page OpenWeatherMap de la ville
+        function redirectToWeatherPage() {
+            window.location.href = `https://openweathermap.org/city/${cityId}`;
+        }
+    
+        // Fonction pour récupérer la météo
+        function fetchWeather() {
+            const apiKey = '775c99556f38bba0056e96bebd1643d1'; // Remplace par ta propre clé API
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=50.6292&lon=3.0573&appid=${apiKey}&units=metric&lang=fr`;
+        
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Problème lors de la récupération des données météo.");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const location = data.name;
+                    const temperature = Math.round(data.main.temp);
+                    const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
+                    const description = data.weather[0].description;
+        
+                    // Vérification et mise à jour du widget
+                    document.getElementById('weather-location').innerText = location;
+                    document.getElementById('weather-temperature').innerText = `${temperature}°C - ${description}`;
+                    document.getElementById('weather-icon').innerHTML = `<img src="${iconUrl}" alt="Météo">`;
+                })
+                .catch(error => {
+                    console.error("Erreur lors du chargement de la météo :", error);
+                    document.getElementById('weather-location').innerText = "Météo indisponible";
+                });
+        }
+        
+        // Appel de la fonction après le chargement de la page
+        document.addEventListener("DOMContentLoaded", fetchWeather)
+    
+        // Mettre à jour la météo toutes les heures
+        setInterval(fetchWeather, 3600000); // 3600000 ms = 1 heure
+    
+        // Initialiser l'heure et le calendrier
+        setInterval(updateClock, 1000);
+        updateClock();
+        generateCalendar(); // Générer le calendrier au chargement
+    
+        // Fonction pour afficher/masquer l'agenda
+        function toggleAgenda() {
+            const agendaContent = document.getElementById('agenda-content');
+            agendaContent.classList.toggle('show');  // Toggle la classe 'show' pour afficher ou masquer
+        }
+    
+        // Fonction pour fermer l'agenda
+        function closeAgenda() {
+            const agendaContent = document.getElementById('agenda-content');
+            agendaContent.classList.remove('show');  // Retirer la classe 'show' pour masquer l'agenda
+        }
+    
+        function toggleBourse() {
+            const modal = document.getElementById('bourse-modal');
+            modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+            if (modal.style.display === 'block') {
+                fetchCryptoData();  // Utilisation de la fonction correcte pour récupérer les données boursières
+            }
+        }
+    
+        function closeBourse() {
+            document.getElementById('bourse-modal').style.display = 'none';
+        }
+    
+        function fetchCryptoData() {
+            const apiKey = 'cv02llpr01qkg4a5rkb0cv02llpr01qkg4a5rkbg'; // Votre clé API Finnhub
+            const usdToEurRate = 0.93; // Taux de conversion USD -> EUR (statique)
+        
+            // Afficher le message de "Chargement des données..."
+            document.getElementById('crypto-data').innerHTML = 'Chargement des données...';
+        
+            let content = '<ul class="crypto-list">'; // Commencer la liste pour le contenu
+        
+            // Requête pour Bitcoin (BTC)
+            fetch(`https://finnhub.io/api/v1/quote?symbol=BINANCE:BTCUSDT&token=${apiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Données Bitcoin:', data); // Débogage pour vérifier les données
+        
+                    // Vérification si les données sont valides
+                    if (data && data.c) {
+                        const priceInUsd = data.c; // Prix de Bitcoin en USD
+                        const changeInPercentage = data.dp; // Changement en pourcentage de Bitcoin
+        
+                        // Conversion du prix de Bitcoin en EUR
+                        const priceInEur = priceInUsd * usdToEurRate;
+        
+                        content += `<li><strong>Bitcoin (BTC)</strong>: ${priceInEur.toFixed(2)} EUR 
+                            <span class="${changeInPercentage >= 0 ? 'positive' : 'negative'}">
+                                (${changeInPercentage >= 0 ? '+' : ''}${changeInPercentage.toFixed(2)}%)
+                            </span></li>`;
+                    } else {
+                        content += '<li>Erreur lors de la récupération des données de Bitcoin.</li>';
+                    }
+        
+                    // Requête pour Ethereum (ETH)
+                    fetch(`https://finnhub.io/api/v1/quote?symbol=BINANCE:ETHUSDT&token=${apiKey}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Données Ethereum:', data); // Débogage pour vérifier les données
+        
+                            // Vérification si les données sont valides
+                            if (data && data.c) {
+                                const priceInUsdEth = data.c; // Prix d'Ethereum en USD
+                                const changeInPercentageEth = data.dp; // Changement en pourcentage d'Ethereum
+        
+                                // Conversion du prix d'Ethereum en EUR
+                                const priceInEurEth = priceInUsdEth * usdToEurRate;
+        
+                                content += `<li><strong>Ethereum (ETH)</strong>: ${priceInEurEth.toFixed(2)} EUR 
+                                <span class="${changeInPercentageEth >= 0 ? 'positive' : 'negative'}">
+                                    (${changeInPercentageEth >= 0 ? '+' : ''}${changeInPercentageEth.toFixed(2)}%)
+                                </span></li>`;
+                            } else {
+                                content += '<li>Erreur lors de la récupération des données d\'Ethereum.</li>';
+                            }
+        
+                            // Ajouter le taux de conversion USD -> EUR
+                            content += `<li><strong>1 USD</strong>: ${usdToEurRate} EUR</li>`;
+        
+                            content += '</ul>'; // Fin de la liste
+        
+                            // Mettre à jour le DOM avec le contenu
+                            document.getElementById('crypto-data').innerHTML = content;
+                        })
+                        .catch(error => {
+                            console.error('Erreur lors de la requête Ethereum:', error);
+                            document.getElementById('crypto-data').innerHTML = 'Erreur lors de la récupération des données d\'Ethereum.';
+                        });
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la requête Bitcoin:', error);
+                    document.getElementById('crypto-data').innerHTML = 'Erreur lors de la récupération des données de Bitcoin.';
+                });
+        }
+    </script>
+    
 
 {% endblock %}
