@@ -1,0 +1,80 @@
+/* Navbar fixée en bas */
+.navbar {
+    background-color: #2c3e50; /* Fond sombre élégant */
+    border-top: 2px solid #34495e; /* Bordure subtile pour la séparation */
+    border-radius: 10px 10px 0 0; /* Coins arrondis pour un effet doux */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Ombre discrète */
+    height: 70px; /* Hauteur ajustée */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999; /* Assure que la navbar reste au-dessus des autres éléments */
+    display: flex;
+    justify-content: center; /* Centrer horizontalement */
+    align-items: center; /* Centrer verticalement */
+    padding: 0 20px; /* Espacement à gauche et à droite */
+    box-sizing: border-box; /* Inclut les bordures dans la taille totale */
+}
+
+/* Conteneur pour les liens dans la navbar */
+.navbar-container {
+    display: flex;
+    justify-content: center; /* Centrer horizontalement */
+    align-items: center; /* Centrer verticalement */
+    width: 100%;
+    max-width: 1100px; /* Limiter la largeur de la navbar pour un meilleur rendu */
+}
+
+/* Style du logo dans la navbar */
+.navbar-logo {
+    margin-right: 20px; /* Espacement à droite du logo */
+}
+
+.logo {
+    width: 40px; /* Largeur du logo */
+    height: auto; /* Laisser la hauteur s'ajuster automatiquement */
+    transition: transform 0.3s ease; /* Effet de transition pour le survol */
+}
+
+/* Effet de survol pour le logo */
+.navbar-logo:hover .logo {
+    transform: scale(1.1); /* Légère animation pour agrandir le logo au survol */
+}
+
+/* Liens de la navbar */
+.nav-link {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #ddd; /* Couleur claire pour les liens */
+    margin: 0 20px; /* Espacement entre les liens */
+    padding: 12px 20px; /* Un peu de padding pour espacer les éléments */
+    text-transform: uppercase; /* Texte en majuscules pour un look plus moderne */
+    border-radius: 5px; /* Coins arrondis pour les liens */
+    transition: all 0.3s ease; /* Transition fluide pour les effets de survol */
+}
+
+/* Effet de survol pour les liens */
+.nav-link:hover {
+    background-color: #007bff; /* Changer le fond au survol */
+    color: #fff; /* Changer la couleur du texte au survol */
+    transform: translateY(-2px); /* Légère animation au survol */
+}
+
+/* Adaptation pour les petits écrans */
+@media (max-width: 768px) {
+    .navbar {
+        height: 60px; /* Réduire la hauteur sur petits écrans */
+        padding: 0 10px;
+    }
+
+    .logo {
+        width: 30px; /* Réduire la taille du logo sur petits écrans */
+    }
+
+    .nav-link {
+        font-size: 1em;
+        margin: 0 10px; /* Réduire l'espacement entre les liens */
+    }
+}

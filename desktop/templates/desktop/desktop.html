@@ -14,22 +14,16 @@
             <p style="color: white; text-shadow: 1px 1px 2px black;">Aucun fichier pour l'instant.</p>
         {% endfor %}
     </div>
+
     <script>
         function openFile(fileId) {
             alert("Ouvrir le fichier ID: " + fileId);
-            // Ici, tu peux rediriger vers l'affichage du fichier, par exemple:
+            // Rediriger vers la page du fichier si nécessaire
             // window.location.href = "/files/" + fileId;
         }
     </script>
-
 {% endblock %}
 
 {% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/desktop.css' %}">
 {% endblock %}
-
-
-
-
-
-
