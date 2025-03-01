@@ -22,6 +22,11 @@
             <div class="file-name">Explorateur</div>
         </div>
 
+        <div class="file-icon" ondblclick="openChatbot()"  onclick="selectIcon(this)">
+            <img src="{% static 'icons/chatbot.png' %}" alt="Chatbot">
+            <div class="file-name">Chatbot</div>
+        </div>
+
         <div id="explorer-modal" class="modal">
             <div class="modal-content">
                 <span class="close" onclick="closeExplorer()">&times;</span>
@@ -45,6 +50,35 @@
             <img id="viewer-img" class="modal-content">
         </div>
 
+        <div id="chatbot" class="modal">
+            
+            <div class="modal-content">
+                <span class="close" onclick="closeChatbot()">&times;</span>
+                <div style="height:80%;">
+                    <header class="header">
+                        <!-- Header Greetings -->
+                        <h1 class="title">Hello, there</h1>
+                        <p class="subtitle">How can I help you today?</p>
+                    </header>
+                        <!-- Chat List / Container -->
+                    <div class="chat-list">
+                    </div>
+                    <!-- Typing Area -->
+                    <div class="typing-area">
+                        <form method="post" onsubmit="sendMessage(event)" class="typing-form">
+                        {% csrf_token %}
+                            <div class="input-wrapper">
+                            <input id="message" type="text" placeholder="Enter a prompt here" class="typing-input" required />
+                            <button id="send-message-button" class="icon material-symbols-rounded">send</button>
+                            </div>
+                        </form>
+                        <p class="disclaimer-text">
+                            Our AI assistant may display inaccurate info, including about people, so double-check its responses.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div id="text-editor" class="modal">
             <div class="modal-content" style="display: flex; flex-direction: column; height: 100%;padding:0;">
@@ -102,6 +136,8 @@
 
 {% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/desktop.css' %}">
+    <link rel="stylesheet" href="{% static 'chat/chat.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/marked@3.0.0/marked.min.js"></script>
 {% endblock %}
 
 

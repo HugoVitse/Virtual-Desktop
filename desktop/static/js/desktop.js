@@ -30,6 +30,13 @@ function openExplorer(csrf) {
     loadFiles("",csrf); // Charger la racine
 }
 
+function openChatbot() {
+    document.getElementById("chatbot").style.display = "block";
+}
+function closeChatbot() {
+    document.getElementById("chatbot").style.display = "none";
+}
+
 function closeExplorer() {
     document.getElementById("explorer-modal").style.display = "none";
 }
@@ -206,3 +213,97 @@ document.addEventListener("mouseup", () => {
   isDragging = false;
   div.style.cursor = "move";
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function getCSRFToken() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    return csrfToken;
+}
+
+async function sendMessage(event) {
+    if(document.getElementById('message').value === '') {
+        return;
+    }
+
+    event.preventDefault();
+
+    const message = document.getElementById('message').value;
+    document.getElementById('message').value = '';
+
+    const outgoing = createMessageOutgoing(message);
+    document.querySelector(".chat-list").appendChild(outgoing);
+
+    const response = await fetch("/chatbot/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCSRFToken(),  // Ajout du token CSRF
+        },
+        body: new URLSearchParams({
+            "message": message,
+        }),
+    });
+
+    const data = await response.json();
+    //console.log(data); // Debug : Affiche la réponse JSON dans la console
+
+    // Afficher uniquement la dernière entrée du chat
+    const lastEntry = data.bot[data.bot.length - 1];  // Récupère la dernière entrée
+    // Récupérer le texte Markdown depuis la réponse du serveur
+    const markdownText = data.bot[data.bot.length - 1][1];  // Dernière entrée, premier élément (message sortant)
+
+    // Convertir le Markdown en HTML avec marked.js
+    const htmlMessage = marked(markdownText);
+    console.log(htmlMessage);
+
+    
+    const incoming = createMessageIncoming(htmlMessage);
+    document.querySelector(".chat-list").appendChild(incoming);
+
+    const chatContainer = document.querySelector(".chat-list");
+    chatContainer.scrollTo({top: document.querySelector(".chat-list").scrollHeight,behavior: 'smooth'});
+}
+
+function createMessageOutgoing(text){
+    const div = document.createElement("div");
+    div.classList.add("message-content");
+    div.innerHTML = "<img class='avatar' src='https://i.postimg.cc/L8hd043C/images.png' alt='User avatar'>";
+    div.innerHTML += "<p class='text'>" + text + "</p>";
+
+    const div2 = document.createElement("div");
+    div2.classList.add("message");
+    div2.classList.add("outgoing"); 
+    div2.appendChild(div);
+    return div2;
+}
+
+function createMessageIncoming(text){
+    const div = document.createElement("div");
+    div.classList.add("message-content");
+    div.innerHTML = "<img class='avatar' src='https://i.postimg.cc/hP2WrQTQ/Gemini-August-Release-SS-width-1300.jpg' alt='Gemini avatar'>";
+    divText = document.createElement("div");
+    divText.classList.add("text");
+    divText.innerHTML = text;
+    div.appendChild(divText);
+    
+    const div2 = document.createElement("div");
+    div2.classList.add("message");
+    div2.classList.add("incoming"); 
+    div2.appendChild(div);
+    return div2;
+}

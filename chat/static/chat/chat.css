@@ -24,7 +24,7 @@
   --secondary-color: #e9eef6;
   --secondary-hover-color: #dbe1ea;
 }
-body {
+#chatbot {
   background: var(--primary-color);
 }
 .header,
@@ -34,7 +34,6 @@ body {
   max-width: 980px;
 }
 .header {
-  margin-top: 6vh;
   padding: 1rem;
   overflow-x: hidden;
 }
@@ -104,9 +103,8 @@ body.hide-header .header {
   background: var(--primary-color);
 }
 .chat-list {
-  padding: 2rem 1rem 12rem;
-  max-height: 100vh;
-  overflow-y: auto;
+  max-height: 50%;
+  overflow-y: scroll;
   scrollbar-color: #999 transparent;
 }
 .chat-list .message.incoming {
