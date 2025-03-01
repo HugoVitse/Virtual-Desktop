@@ -17,6 +17,7 @@ def user_directory_path(instance, filename):
     """
     # Utilise la valeur du champ name si elle est renseignée, sinon filename
     custom_path = instance.name or filename
+    print(custom_path)
     # Retire le slash initial s'il y en a un pour éviter un chemin absolu
     custom_path = custom_path.lstrip('/')
     return os.path.join('files', str(instance.user.id), custom_path)
@@ -31,10 +32,12 @@ class File(models.Model):
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
+    def save(self,path, *args, **kwargs):
         # Si le champ file est renseigné, on enregistre son chemin dans file_path
+        print(f'{path}/{self.file.name}')
         if self.file:
-            self.file_path = self.file.name
+            self.name = f'{path}/{self.file.name}'
+            self.file_path = f'{path}/{self.file.name}'
 
         super().save(*args, **kwargs)
 

@@ -1,5 +1,7 @@
 # desktop/views.py
 from django.shortcuts import render
+from django.template import RequestContext
+from files.forms import FileUploadForm
 from files.models import File
 from django.contrib.auth.decorators import login_required
 import os
@@ -26,7 +28,7 @@ def file(request):
     with open(full_path, 'rb') as f:
         file_data = f.read()
 
-    file_data_base64 = base64.b64encode(file_data).decode('utf-8')
+    file_data_base64 = base64.b64encode(file_data).decode('utf-8') if file.file_type =='image'  else file_data.decode('utf-8')
     response = JsonResponse({'file_name': os.path.basename(full_path), 'file_data': file_data_base64})
     return response
 
@@ -34,8 +36,9 @@ def file(request):
 @login_required
 def desktop_view(request):
     # Cette vue rendra le template desktop.html
+    form = FileUploadForm()
     files = File.objects.filter(user_id=request.user.id)  # Afficher uniquement les fichiers de l'utilisateur connecté
-    return render(request, 'desktop/desktop.html', {'files': files})
+    return render(request, 'desktop/desktop.html', {'files': files, 'form': form})
 
 
 @login_required

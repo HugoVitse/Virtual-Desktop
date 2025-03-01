@@ -8,7 +8,7 @@
     <div class="desktop">
         {% for file in files %}
             {% if file.name|slice:":9" == "/Desktop/" %}
-                <div class="file-icon" ondblclick="openFile('{{ file.id }}','{{ file.file_type }}')" onclick="selectIcon(this)">
+                <div class="file-icon" ondblclick="openFile('{{ file.id }}','{{ file.file_type }}', '{{ file.name }}', '{{ csrf_token }}')" onclick="selectIcon(this)">
                     <img src="{% static 'icons/' %}{{ file.file_type }}.png" alt="{{ file.file_type }}">
                     <div class="file-name">{{ file.name|basename }}</div>
                 </div>
@@ -17,7 +17,7 @@
             <p style="color: white; text-shadow: 1px 1px 2px black;">Aucun fichier pour l'instant.</p>
         {% endfor %}
 
-        <div class="file-icon" ondblclick="openExplorer()"  onclick="selectIcon(this)">
+        <div class="file-icon" ondblclick="openExplorer('{{ csrf_token }}')"  onclick="selectIcon(this)">
             <img src="{% static 'icons/explorer.png' %}" alt="Explorateur">
             <div class="file-name">Explorateur</div>
         </div>
@@ -26,7 +26,16 @@
             <div class="modal-content">
                 <span class="close" onclick="closeExplorer()">&times;</span>
                 <h2>Explorateur de Fichiers</h2>
-                <button onclick="goBack()">⬅ Retour</button>
+                <div id="buttonContainer">
+                    <button id="backButton" onclick="goBack()">⬅ Retour</button>
+                    <div>
+                        <button id="mkdir" onclick="">📁</button>
+                        <button id="uploadButton" onclick="">⬇ Importer ici</button>
+                        
+                    </div>
+                    
+                </div>
+                
                 <div id="file-list"></div>
             </div>
         </div>
@@ -36,9 +45,14 @@
             <img id="viewer-img" class="modal-content">
         </div>
 
+
         <div id="text-editor" class="modal">
             <div class="modal-content" style="display: flex; flex-direction: column; height: 100%;padding:0;">
-                <span class="close" onclick="openPopup()" style="align-self: flex-end;">&times;</span>
+                <div> 
+                    <span class="close" onclick="openPopup()">&times;</span>
+                    <span id="file-name" style="float: left;"></span>
+                </div>
+                
                 <textarea id="edit-text" style="flex-grow: 1; resize: none;"></textarea>
                 <button id='save-button' onclick="" style="align-self: flex-end; margin-top: 10px;">Enregistrer</button>
             </div>
@@ -53,170 +67,33 @@
             </div>
         </div>
 
+        <div class="modal" id="upload-modal">
+            <div class="modal-content" style="display: flex; flex-direction: column; height: 100%;background-color: #262626;padding: 10px;">
+                <span class="close" onclick="closeUpload()">&times;</span>
+                <form method="post" enctype="multipart/form-data" action="/files/upload/">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input id="path" type="hidden" name="path" value="">
+                    <button type="submit">Télécharger</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal" id="mkdirModal">
+            <div class="modal-content" style="display: flex; flex-direction: column; height: 100%; background-color: #262626;padding: 10px;">
+                <span class="close" onclick="closeMkdir()">&times;</span>
+                <form method="post" enctype="multipart/form-data" action="/files/mkdir/">
+                    {% csrf_token %}
+                    <label for="name">Nom du dossier</label>
+                    <input type="text" name="name" id="name">
+                    <input id="pathMkdir" type="hidden" name="path" value="">
+                    <button type="submit">Créer</button>
+                </form>
+            </div>
+        </div>
+
     </div>
-    <script>
-        function selectIcon(selectedEl) {
-            // Récupère toutes les icônes
-            const icons = document.querySelectorAll('.file-icon');
-            icons.forEach(icon => {
-                // Retire la classe active de toutes les icônes
-                if (icon !== selectedEl) {
-                    icon.classList.remove('active');
-                }
-            });
-            // Ajoute la classe active sur l'icône cliquée
-            selectedEl.classList.toggle('active');
-        }
-    </script>
-    <script>
-        function openFile(fileId, fileType) {
-            if (fileType === "img") {
-                openImageViewer(`/desktop/file/?file_id=${encodeURIComponent(fileId)}`);
-            } else if (fileType === "txt") {
-                openTextEditor(`/desktop/file/?file_id=${encodeURIComponent(fileId)}`, fileId);
-            }
-
-        }
-    </script>
-    <script>
-        let currentPath = "";  // Chemin actuel dans media/files/<user_id>/
-        
-        function openExplorer() {
-            document.getElementById("explorer-modal").style.display = "block";
-            loadFiles(""); // Charger la racine
-        }
-    
-        function closeExplorer() {
-            document.getElementById("explorer-modal").style.display = "none";
-        }
-    
-        function loadFiles(path) {
-            currentPath = path;
-            let fileList = document.getElementById("file-list");
-            fileList.innerHTML = "<p>Chargement...</p>";
-    
-            fetch(`/desktop/explorer/?path=${encodeURIComponent(path)}`)
-                .then(response => response.json())
-                .then(data => {
-                    fileList.innerHTML = "";  // Nettoie la liste
-                    if (data.error) {
-                        fileList.innerHTML = `<p style="color: red;">${data.error}</p>`;
-                        return;
-                    }
-    
-                    // Ajouter les dossiers en premier
-                    data.folders.forEach(folder => {
-                        let div = document.createElement("div");
-                        div.className = "file-item";
-                        div.innerHTML = "📁 " + folder.name;
-                        div.onclick = () => loadFiles(folder.path); // Naviguer dans le dossier
-                        fileList.appendChild(div);
-                    });
-    
-                    // Ajouter les fichiers
-                    data.files.forEach(file => {
-                        let div = document.createElement("div");
-                        div.className = "file-item";
-                        div.innerHTML = "📄 " + file.name;
-                        div.onclick = () => openFile(file.id, file.type)
-                        fileList.appendChild(div);
-                    });
-    
-                    if (data.folders.length === 0 && data.files.length === 0) {
-                        fileList.innerHTML = "<p>Aucun fichier ni dossier.</p>";
-                    }
-                })
-                .catch(error => {
-                    console.error("Erreur:", error);
-                    fileList.innerHTML = "<p style='color: red;'>Erreur de chargement.</p>";
-                });
-        }
-    
-        function goBack() {
-            if (currentPath === "") return; // On est déjà à la racine
-    
-            let parts = currentPath.split("/").filter(p => p);
-            parts.pop(); // Retirer le dernier dossier
-            let newPath = parts.join("/");
-            loadFiles(newPath); // Charger le nouveau chemin
-        }
-    </script>
-    <script>
-        function openImageViewer(imageUrl, fileName) {
-            let viewer = document.getElementById("image-viewer");
-            let viewerImg = document.getElementById("viewer-img");
-            
-    
-            viewer.style.display = "block";  // Afficher la visionneuse
-            fetch(imageUrl)
-                .then(response => response.json())
-                .then(data => {
-                    viewerImg.src = `data:image/png;base64,${data.file_data}`;
-                })
-    
-        }
-    
-        function closeImageViewer() {
-            document.getElementById("image-viewer").style.display = "none";
-        }
-    </script>
-
-    <script>
-        function openTextEditor(textUrl, fileId) {
-            let textEditor = document.getElementById("text-editor");
-            let editText = document.getElementById("edit-text");
-            let buttonSave = document.getElementById("save-button");
-            let buttonSavePopup  = document.getElementById("save-button-popup");
-
-
-            buttonSave.setAttribute("onclick",`saveText(${fileId})`);
-            buttonSavePopup.setAttribute("onclick",`saveText(${fileId})`);
-
-            textEditor.style.display = "block";  // Afficher la visionneuse
-            fetch(textUrl)
-                .then(response => response.json())
-                .then(data => {
-                    editText.innerText = data.file_data;
-                })
-
-        }
-
-        function closeTextEditor() {
-            document.getElementById("text-editor").style.display = "none";
-        }
-
-        function saveText(fileId) {
-           
-            let editText = document.getElementById("edit-text").value;
-
-            fetch('/files/update/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}' // Assurez-vous que le token CSRF est inclus
-                },
-                body: new URLSearchParams({
-                    file_id: fileId,
-                    data: editText
-                })
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert('Erreur lors de l\'enregistrement du fichier.');
-            });
-            closeTextEditor();
-            closePopup();
-        }
-
-        function closePopup() {
-            document.getElementById("popup").style.display = "none";
-
-        }
-
-        function openPopup() {
-            document.getElementById("popup").style.display = "block";
-        }
-    </script>
+    <script src="{% static 'js/desktop.js' %}"> </script>
     
 
 

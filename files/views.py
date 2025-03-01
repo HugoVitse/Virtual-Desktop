@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .forms import FileUploadForm
 from .models import File
 from django.contrib.auth.decorators import login_required
+import os
 
 @login_required
 def upload_file(request):
@@ -10,11 +11,21 @@ def upload_file(request):
         if form.is_valid():
             file_instance = form.save(commit=False)
             file_instance.user = request.user  # On affecte l'utilisateur connecté
-            file_instance.save()
+            file_instance.save(request.POST.get('path'))  # On enregistre le fichier
             return redirect('desktop')  # Redirige vers une page listant les fichiers (à créer)
     else:
         form = FileUploadForm()
     return render(request, 'files/upload_file.html', {'form': form})
+
+
+@login_required
+def mkdir(request):
+    if request.method == 'POST':
+        path = request.POST.get('path')
+        name = request.POST.get('name')
+        os.makedirs(f'media/files/{request.user.id}/{path}/{name}')
+    return redirect('desktop')  # Redirige vers une page listant les fichiers (à créer)
+
 
 @login_required
 def file_view(request):
