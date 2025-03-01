@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'chat/chat.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/marked@3.0.0/marked.min.js"></script>
+
+
+    <script>
+        // Fonction pour obtenir le token CSRF depuis le cookie
+        function getCSRFToken() {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            return csrfToken;
+        }
+
+        async function sendMessage(event) {
+            if(document.getElementById('message').value === '') {
+                return;
+            }
+
+            event.preventDefault();
+
+            const message = document.getElementById('message').value;
+            document.getElementById('message').value = '';
+
+            const outgoing = createMessageOutgoing(message);
+            document.querySelector(".chat-list").appendChild(outgoing);
+
+            const response = await fetch("{% url 'chat' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": getCSRFToken(),  // Ajout du token CSRF
+                },
+                body: new URLSearchParams({
+                    "message": message,
+                }),
+            });
+
+            const data = await response.json();
+            //console.log(data); // Debug : Affiche la réponse JSON dans la console
+
+            // Afficher uniquement la dernière entrée du chat
+            const lastEntry = data.bot[data.bot.length - 1];  // Récupère la dernière entrée
+            // Récupérer le texte Markdown depuis la réponse du serveur
+            const markdownText = data.bot[data.bot.length - 1][1];  // Dernière entrée, premier élément (message sortant)
+
+            // Convertir le Markdown en HTML avec marked.js
+            const htmlMessage = marked(markdownText);
+            console.log(htmlMessage);
+
+            
+            const incoming = createMessageIncoming(htmlMessage);
+            document.querySelector(".chat-list").appendChild(incoming);
+
+            const chatContainer = document.querySelector(".chat-list");
+            chatContainer.scrollTo({top: document.querySelector(".chat-list").scrollHeight,behavior: 'smooth'});
+        }
+
+        function createMessageOutgoing(text){
+            const div = document.createElement("div");
+            div.classList.add("message-content");
+            div.innerHTML = "<img class='avatar' src='https://i.postimg.cc/L8hd043C/images.png' alt='User avatar'>";
+            div.innerHTML += "<p class='text'>" + text + "</p>";
+
+            const div2 = document.createElement("div");
+            div2.classList.add("message");
+            div2.classList.add("outgoing"); 
+            div2.appendChild(div);
+            return div2;
+        }
+
+        function createMessageIncoming(text){
+            const div = document.createElement("div");
+            div.classList.add("message-content");
+            div.innerHTML = "<img class='avatar' src='https://i.postimg.cc/hP2WrQTQ/Gemini-August-Release-SS-width-1300.jpg' alt='Gemini avatar'>";
+            divText = document.createElement("div");
+            divText.classList.add("text");
+            divText.innerHTML = text;
+            div.appendChild(divText);
+            
+            const div2 = document.createElement("div");
+            div2.classList.add("message");
+            div2.classList.add("incoming"); 
+            div2.appendChild(div);
+            return div2;
+        }
+    </script>
+</head>
+
+<header class="header">
+    <!-- Header Greetings -->
+    <h1 class="title">Hello, there</h1>
+    <p class="subtitle">How can I help you today?</p>
+    </header>
+    <!-- Chat List / Container -->
+    <div class="chat-list">
+    </div>
+    <!-- Typing Area -->
+    <div class="typing-area">
+    <form method="post" onsubmit="sendMessage(event)" class="typing-form">
+    {% csrf_token %}
+        <div class="input-wrapper">
+        <input id="message" type="text" placeholder="Enter a prompt here" class="typing-input" required />
+        <button id="send-message-button" class="icon material-symbols-rounded">send</button>
+        </div>
+    </form>
+    <p class="disclaimer-text">
+        Our AI assistant may display inaccurate info, including about people, so double-check its responses.
+    </p>
+    </div>
+</html>
+```
