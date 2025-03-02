@@ -103,7 +103,7 @@ body.hide-header .header {
   background: var(--primary-color);
 }
 .chat-list {
-  max-height: 50%;
+  max-height: 45%;
   overflow-y: scroll;
   scrollbar-color: #999 transparent;
 }

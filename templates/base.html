@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,13 +9,17 @@
 
     {% block extra_head %}
     <!-- Tout code supplémentaire (CSS, JS) ici -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/navbar.css' %}">
     {% endblock %}
 </head>
 <body>
     <!-- Menu de navigation -->
+    {% include 'navbar.html' %}
+
+    <!-- Zone de connexion pour les utilisateurs non authentifiés -->
     <nav>
         {% if user.is_authenticated %}
-           
+            <!-- Les utilisateurs connectés peuvent voir un menu supplémentaire ou autre ici -->
         {% else %}
             <a href="{% url 'login' %}">Connexion</a> | <a href="{% url 'register' %}">Inscription</a>
         {% endif %}

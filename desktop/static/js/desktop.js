@@ -240,7 +240,10 @@ async function sendMessage(event) {
         return;
     }
 
+    const chatContainer = document.querySelector(".chat-list");
+    
     event.preventDefault();
+
 
     const message = document.getElementById('message').value;
     document.getElementById('message').value = '';
@@ -248,6 +251,7 @@ async function sendMessage(event) {
     const outgoing = createMessageOutgoing(message);
     document.querySelector(".chat-list").appendChild(outgoing);
 
+    chatContainer.scrollTo({top: document.querySelector(".chat-list").scrollHeight,behavior: 'smooth'});
     const response = await fetch("/chatbot/", {
         method: "POST",
         headers: {
@@ -275,7 +279,7 @@ async function sendMessage(event) {
     const incoming = createMessageIncoming(htmlMessage);
     document.querySelector(".chat-list").appendChild(incoming);
 
-    const chatContainer = document.querySelector(".chat-list");
+   
     chatContainer.scrollTo({top: document.querySelector(".chat-list").scrollHeight,behavior: 'smooth'});
 }
 

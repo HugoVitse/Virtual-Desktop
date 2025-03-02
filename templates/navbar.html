@@ -1,0 +1,183 @@
+{% load static %}
+
+{% block content %}
+    <!-- Terminal moderne et stylisé -->
+    <div id="terminal-container" class="terminal-container">
+        <div class="terminal-header">
+            <span class="terminal-title">Terminal</span>
+            <button class="close-btn" onclick="toggleTerminal()">✕</button>
+        </div>
+        <div class="terminal-output" id="terminal-output">
+            {% if output %}
+                <pre class="output">{{ output }}</pre>
+            {% endif %}
+            {% if error %}
+                <pre class="error">{{ error }}</pre>
+            {% endif %}
+        </div>
+        <form method="POST" id="terminal-form">
+            {% csrf_token %}
+            <input type="text" name="command" class="terminal-input" placeholder="Tapez une commande..." required autofocus />
+            <button type="submit" class="terminal-btn">Exécuter</button>
+        </form>
+    </div>
+
+    <!-- Navbar fixée en bas -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-bottom">
+        <div class="navbar-container">
+            <a href="/desktop" class="navbar-logo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Windows_logo_-_2012.png" alt="Logo" class="logo" />
+            </a>
+            <a href="/desktop" class="nav-link">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Windows_10_File_Explorer_icon.png" alt="LogoExplorer" class="logo" />
+            </a>
+            <a href="/desktop" class="nav-link">
+                <img src="https://img.icons8.com/?size=512&id=kzZctsAbGur5&format=png" alt="LogoAgenda" class="logo" />
+            </a>
+            <button onclick="toggleTerminal()" class="toggle-terminal-btn nav-link">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Windows_Terminal_logo.svg/1200px-Windows_Terminal_logo.svg.png" alt="LogoTerminal" class="logo" />
+            </button>
+            <a href="/desktop" class="nav-link">
+                <img src="https://img.icons8.com/?size=512&id=qA3w9Yp2vY7r&format=png" alt="LogoMeteo" class="logo" />
+            </a>
+        </div>
+    </nav>
+{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/navbar.css' %}">
+    <style>
+        /* Terminal moderne */
+        .terminal-container {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            max-width: 700px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            color: white;
+            padding: 15px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Effet visible */
+        .terminal-container.active {
+            display: block;
+        }
+
+        /* En-tête du terminal */
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #333;
+            padding: 10px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .terminal-title {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* Bouton de fermeture */
+        .close-btn {
+            background: #ff5555;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .close-btn:hover {
+            background: #ff2222;
+        }
+
+        /* Zone de sortie du terminal */
+        .terminal-output {
+            background: #111;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            border-radius: 5px;
+            font-family: "Courier New", monospace;
+            font-size: 14px;
+            color: #4ef56c;
+        }
+
+        /* Entrée de commande */
+        .terminal-input {
+            width: calc(100% - 80px);
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            background: #2a2a2a;
+            color: white;
+            border-radius: 5px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        /* Bouton Exécuter */
+        .terminal-btn {
+            background: #3a82f7;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .terminal-btn:hover {
+            background: #1a62d7;
+        }
+
+        /* Erreur */
+        .error {
+            color: #ff4444;
+        }
+    </style>
+
+    <script>
+        function toggleTerminal(forceOpen = false) {
+            let terminal = document.getElementById("terminal-container");
+            let isVisible = terminal.classList.contains("active");
+
+            if (forceOpen || !isVisible) {
+                terminal.classList.add("active");
+                localStorage.setItem("terminalOpen", "true");
+            } else {
+                terminal.classList.remove("active");
+                localStorage.setItem("terminalOpen", "false");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Vérifier si le terminal était ouvert avant le rechargement
+            if (localStorage.getItem("terminalOpen") === "true") {
+                toggleTerminal(true);
+            }
+
+            let form = document.getElementById("terminal-form");
+            let outputDiv = document.getElementById("terminal-output");
+
+            form.addEventListener("submit", function () {
+                localStorage.setItem("terminalOpen", "true");
+
+                // Scroll automatique vers le bas après exécution d'une commande
+                setTimeout(() => {
+                    outputDiv.scrollTop = outputDiv.scrollHeight;
+                }, 100);
+            });
+        });
+    </script>
+{% endblock %}

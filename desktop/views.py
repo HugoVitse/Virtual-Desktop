@@ -1,4 +1,5 @@
-# desktop/views.py
+import shlex
+import subprocess
 from django.shortcuts import render
 from django.template import RequestContext
 from files.forms import FileUploadForm
@@ -32,13 +33,6 @@ def file(request):
     response = JsonResponse({'file_name': os.path.basename(full_path), 'file_data': file_data_base64})
     return response
 
-
-@login_required
-def desktop_view(request):
-    # Cette vue rendra le template desktop.html
-    form = FileUploadForm()
-    files = File.objects.filter(user_id=request.user.id)  # Afficher uniquement les fichiers de l'utilisateur connecté
-    return render(request, 'desktop/desktop.html', {'files': files, 'form': form})
 
 
 @login_required
@@ -74,4 +68,74 @@ def list_directory(request):
     return JsonResponse({'folders': folders, 'files': files})
 
 
+
+from django.contrib.auth.decorators import login_required
+from files.models import File
+
+@login_required
+def desktop_view(request):
+    # Récupérer les fichiers de l'utilisateur connecté
+    files = File.objects.filter(user_id=request.user.id)
+    form = FileUploadForm()
+
+    # Initialiser les variables pour le terminal
+    output = ""
+    error = ""
+
+    ALLOWED_COMMANDS = {"ls", "cat", "echo", "touch", "rm", "mkdir", "rmdir"}
+
+    if request.method == "POST":
+        user_id = request.user.id  # Supposons que l'utilisateur soit authentifié
+        user_dir = os.path.abspath(f"media/files/{user_id}/")  
+
+        # Vérifier que le dossier existe, sinon refuser l'exécution
+        if not os.path.exists(user_dir):
+            return JsonResponse({"error": "Répertoire utilisateur introuvable"}, status=400)
+
+        command = request.POST.get("command", "").strip()
+
+        if not command:
+            return JsonResponse({"error": "Commande vide non autorisée"}, status=400)
+
+        try:
+            # Séparer proprement la commande en liste
+            command_list = shlex.split(command)
+            if command_list[0] not in ALLOWED_COMMANDS:
+                throw_error = f"Commande non autorisée: {command_list[0]}"
+                raise Exception(throw_error)
+            
+            for arg in command_list[1:]:
+                if os.path.isabs(arg) or ".." in arg:
+                    throw_error = f"Argument non autorisé: {arg}"
+                    raise Exception(throw_error)
+
+                # Convertir le chemin en absolu et vérifier qu'il est bien dans user_dir
+                arg_path = os.path.abspath(os.path.join(user_dir, arg))
+                if not arg_path.startswith(user_dir):
+                    throw_error = f"Argument non autorisé: {arg}"
+                    raise Exception(throw_error)
+
+            # Exécuter uniquement dans le dossier de l'utilisateur
+            result = subprocess.run(
+                command_list,
+                cwd=user_dir,  # Forcer l'exécution dans le répertoire autorisé
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+
+            
+            output = result.stdout
+            
+        except Exception as e:
+            error = str(e)
+
+    context = {
+        "files": files,  # Affichage des fichiers de l'utilisateur
+        "output": output,  # Résultat du terminal
+        "error": error,  # Erreur éventuelle du terminal
+        "form":form
+    }
+
+    return render(request, "desktop/desktop.html", context)
 
