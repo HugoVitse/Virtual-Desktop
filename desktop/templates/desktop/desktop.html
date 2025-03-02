@@ -4,6 +4,18 @@
 
 {% block title %}Mon Bureau Virtuel{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/desktop.css' %}">
+    <link rel="stylesheet" href="{% static 'chat/chat.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/marked@3.0.0/marked.min.js"></script>
+
+
+
+{% endblock %}
+
 {% block content %}
     <div class="desktop">
         {% for file in files %}
@@ -14,7 +26,7 @@
                 </div>
             {% endif %}
         {% empty %}
-            <p style="color: white; text-shadow: 1px 1px 2px black;">Aucun fichier pour l'instant.</p>
+            <p class="no-files">Aucun fichier pour l'instant.</p>
         {% endfor %}
 
         <div class="file-icon" ondblclick="openExplorer('{{ csrf_token }}')"  onclick="selectIcon(this)">
@@ -126,16 +138,372 @@
             </div>
         </div>
 
+        <div>
+            <img src="{% static 'icons/ordre-du-jour.png' %}" alt="Ordre du jour" class="order-icon" onclick="toggleAgenda()">
+        </div>
+        
+        <!-- Section Agenda -->
+        <div id="agenda-content" class="agenda-content {% if show_agenda %}show{% endif %}">
+            <img src="{% static 'icons/proche.png' %}" alt="Fermer" class="close-icon" onclick="closeAgenda()">
+            <div class="agenda-header">
+                Ordre du Jour
+            </div>
+            <div class="agenda-content-inner">
+                 <!-- Formulaire pour ajouter une tâche -->
+                    <div class="add-task-form">
+                        <h3>Ajouter une nouvelle tâche</h3>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="text" name="title" placeholder="Titre de la tâche" required>
+                            <textarea name="description" placeholder="Description de la tâche" required></textarea>
+                            <input type="datetime-local" name="due_date" required>
+                            <button type="submit" name="add_task">Ajouter</button>
+                        </form>
+                    </div>
+
+                    <!-- Affichage des tâches -->
+                    <div class="task-container">
+                        {% if tasks %}
+                            {% for task in tasks %}
+                            <div class="task">
+                                <div class="task-details">
+                                    <div class="task-title">{{ task.title }}</div>
+                                    <div class="task-description">{{ task.description }}</div>
+                                    <div class="task-due-date">Due: {{ task.due_date|date:"d M Y, H:i" }}</div>
+                                </div>
+                                <div class="task-actions">
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="task_id" value="{{ task.id }}">
+                                        <button type="submit" name="delete_task">Supprimer</button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>Aucune tâche pour l'instant.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barre des tâches -->
+        <div class="taskbar">
+            <div class="taskbar-left">
+                <div class="start-menu" onclick="toggleStartMenu()">
+                    <img src="{% static 'icons/start.png' %}" alt="Start" class="start-icon"> Démarrer
+                </div>
+            </div>
+
+            <div class="taskbar-center">
+                <div class="taskbar-clock" id="clock">{{ current_time }}</div> <!-- Heure dynamique -->
+            </div>
+
+            <div class="taskbar-right">
+                <div class="taskbar-agenda" onclick="toggleBourse()">
+                    <img src="{% static 'icons/bourse.png' %}" alt="Bourse" class="agenda-icon">
+                </div>
+            </div>
+
+            <div class="taskbar-right">
+                <div class="taskbar-agenda" onclick="toggleCalendar()">
+                    <img src="{% static 'icons/calendrier.png' %}" alt="Agenda" class="agenda-icon">
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Démarrer -->
+        <div id="start-menu-content" class="start-menu-content hidden">
+            <ul>
+                {% for item in menu_items %}
+                    <li><a href="{{ item.link }}">{{ item.icon }} {{ item.label }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Section Météo -->
+        <div id="weather-widget" class="weather-widget" onclick="redirectToWeatherPage()">
+            <div class="weather-info">
+                <div id="weather-location"></div>
+                <div id="weather-temperature"></div>
+            </div>
+            <div id="weather-icon"></div>
+        </div>
+
+        <!-- Affichage du calendrier -->
+        <div id="calendar-modal" class="calendar-modal">
+            <div class="calendar-container">
+                <img src="{% static 'icons/proche.png' %}" alt="Fermer" class="close1-icon" onclick="closeCalendar()">
+                <div id="calendar" class="calendar"></div>
+            </div>
+        </div>
+
+        <!-- Widget Bourse -->
+        <div id="bourse-modal" class="bourse-modal">
+            <div class="bourse-container">
+                <img src="{% static 'icons/proche.png' %}" alt="Fermer" class="close2-icon" onclick="closeBourse()">
+                <div class="bourse-header">Marchés Boursiers</div>
+                <div id="crypto-data" class="bourse-content">
+                    <p id="loading-message">Chargement des données...</p>
+                </div>
+            </div>
+        </div>
+
     </div>
     <script src="{% static 'js/desktop.js' %}"> </script>
     
 
 
 
-{% endblock %}
+        
+         <!-- Icône pour afficher ou masquer l'Ordre du Jour -->
+         
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/desktop.css' %}">
-    <link rel="stylesheet" href="{% static 'chat/chat.css' %}">
-    <script src="https://cdn.jsdelivr.net/npm/marked@3.0.0/marked.min.js"></script>
+
+
+
+    <script>
+        let currentMonth = moment(); // Initialiser le mois courant avec Moment.js
+    
+        // Fonction pour changer de mois (précédent ou suivant)
+        function changeMonth(direction) {
+            currentMonth.add(direction, 'months');  // Ajouter ou soustraire un mois en fonction de la direction
+            generateCalendar();  // Regénérer le calendrier avec le nouveau mois
+        }
+    
+        // Générer un calendrier
+        function generateCalendar() {
+            const month = currentMonth.month(); // Mois actuel
+            const year = currentMonth.year(); // Année actuelle
+            const today = moment(); // Récupérer la date d'aujourd'hui
+    
+            let calendarHTML = `<div class="calendar-header">
+                <button onclick="changeMonth(-1)">❮</button> <!-- Flèche précédente -->
+                <span>${currentMonth.format('MMMM YYYY')}</span>
+                <button onclick="changeMonth(1)">❯</button> <!-- Flèche suivante -->
+            </div>`;
+    
+            const daysOfWeek = ["D", "L", "M", "M", "J", "V", "S"];
+            calendarHTML += "<div class='calendar-days'>";
+            for (let day of daysOfWeek) {
+                calendarHTML += `<div class='calendar-day-header'>${day}</div>`;
+            }
+            calendarHTML += "</div>";
+    
+            const startOfMonth = moment([year, month]).startOf('month');
+            const endOfMonth = moment([year, month]).endOf('month');
+            const startDay = startOfMonth.day();
+            const totalDays = endOfMonth.date();
+    
+            let dayCounter = 1;
+            let calendarRows = [];
+    
+            // Créer une ligne de jours
+            let rowHTML = "<div class='calendar-row'>";
+            for (let col = 0; col < startDay; col++) {
+                rowHTML += "<div class='calendar-day'></div>"; // Jour vide avant début du mois
+            }
+    
+            for (let col = startDay; col < 7; col++) {
+                if (dayCounter <= totalDays) {
+                    let dayClass = ''; 
+                    if (today.date() === dayCounter && today.month() === month && today.year() === year) {
+                        dayClass = 'current-day'; // Ajouter la classe pour le jour actuel
+                    }
+                    rowHTML += `<div class='calendar-day ${dayClass}'>${dayCounter}</div>`;
+                    dayCounter++;
+                }
+            }
+            rowHTML += "</div>"; // Fin de la première ligne
+            calendarRows.push(rowHTML);
+    
+            // Créer les lignes suivantes
+            while (dayCounter <= totalDays) {
+                let rowHTML = "<div class='calendar-row'>";
+                for (let col = 0; col < 7; col++) {
+                    if (dayCounter <= totalDays) {
+                        let dayClass = ''; 
+                        if (today.date() === dayCounter && today.month() === month && today.year() === year) {
+                            dayClass = 'current-day'; // Ajouter la classe pour le jour actuel
+                        }
+                        rowHTML += `<div class='calendar-day ${dayClass}'>${dayCounter}</div>`;
+                        dayCounter++;
+                    } else {
+                        rowHTML += "<div class='calendar-day'></div>"; // Jour vide après fin du mois
+                    }
+                }
+                rowHTML += "</div>";
+                calendarRows.push(rowHTML);
+            }
+    
+            calendarHTML += `<div class="calendar-month">${calendarRows.join('')}</div>`;
+    
+            document.getElementById('calendar').innerHTML = calendarHTML;
+        }
+    
+        // Mettre à jour l'heure
+        function updateClock() {
+            const now = new Date();
+            document.getElementById("clock").innerText = now.toLocaleTimeString();
+        }
+    
+        // Toggle le calendrier (ouvrir/fermer)
+        function toggleCalendar() {
+            const modal = document.getElementById('calendar-modal');
+            modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+        }
+    
+        // Fermer le calendrier
+        function closeCalendar() {
+            const modal = document.getElementById('calendar-modal');
+            modal.style.display = 'none';
+        }
+    
+        // Remplacer par l'URL de la ville Lille (ID OpenWeatherMap)
+        const cityId = 2998324; // Lille
+    
+        // Fonction pour rediriger vers la page OpenWeatherMap de la ville
+        function redirectToWeatherPage() {
+            window.location.href = `https://openweathermap.org/city/${cityId}`;
+        }
+    
+        // Fonction pour récupérer la météo
+        function fetchWeather() {
+            const apiKey = '775c99556f38bba0056e96bebd1643d1'; // Remplace par ta propre clé API
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=50.6292&lon=3.0573&appid=${apiKey}&units=metric&lang=fr`;
+        
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Problème lors de la récupération des données météo.");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const location = data.name;
+                    const temperature = Math.round(data.main.temp);
+                    const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
+                    const description = data.weather[0].description;
+        
+                    // Vérification et mise à jour du widget
+                    document.getElementById('weather-location').innerText = location;
+                    document.getElementById('weather-temperature').innerText = `${temperature}°C - ${description}`;
+                    document.getElementById('weather-icon').innerHTML = `<img src="${iconUrl}" alt="Météo">`;
+                })
+                .catch(error => {
+                    console.error("Erreur lors du chargement de la météo :", error);
+                    document.getElementById('weather-location').innerText = "Météo indisponible";
+                });
+        }
+        
+        // Appel de la fonction après le chargement de la page
+        document.addEventListener("DOMContentLoaded", fetchWeather)
+    
+        // Mettre à jour la météo toutes les heures
+        setInterval(fetchWeather, 3600000); // 3600000 ms = 1 heure
+    
+        // Initialiser l'heure et le calendrier
+        setInterval(updateClock, 1000);
+        updateClock();
+        generateCalendar(); // Générer le calendrier au chargement
+    
+        // Fonction pour afficher/masquer l'agenda
+        function toggleAgenda() {
+            const agendaContent = document.getElementById('agenda-content');
+            agendaContent.classList.toggle('show');  // Toggle la classe 'show' pour afficher ou masquer
+        }
+    
+        // Fonction pour fermer l'agenda
+        function closeAgenda() {
+            const agendaContent = document.getElementById('agenda-content');
+            agendaContent.classList.remove('show');  // Retirer la classe 'show' pour masquer l'agenda
+        }
+    
+        function toggleBourse() {
+            const modal = document.getElementById('bourse-modal');
+            modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+            if (modal.style.display === 'block') {
+                fetchCryptoData();  // Utilisation de la fonction correcte pour récupérer les données boursières
+            }
+        }
+    
+        function closeBourse() {
+            document.getElementById('bourse-modal').style.display = 'none';
+        }
+    
+        function fetchCryptoData() {
+            const apiKey = 'cv02llpr01qkg4a5rkb0cv02llpr01qkg4a5rkbg'; // Votre clé API Finnhub
+            const usdToEurRate = 0.93; // Taux de conversion USD -> EUR (statique)
+        
+            // Afficher le message de "Chargement des données..."
+            document.getElementById('crypto-data').innerHTML = 'Chargement des données...';
+        
+            let content = '<ul class="crypto-list">'; // Commencer la liste pour le contenu
+        
+            // Requête pour Bitcoin (BTC)
+            fetch(`https://finnhub.io/api/v1/quote?symbol=BINANCE:BTCUSDT&token=${apiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Données Bitcoin:', data); // Débogage pour vérifier les données
+        
+                    // Vérification si les données sont valides
+                    if (data && data.c) {
+                        const priceInUsd = data.c; // Prix de Bitcoin en USD
+                        const changeInPercentage = data.dp; // Changement en pourcentage de Bitcoin
+        
+                        // Conversion du prix de Bitcoin en EUR
+                        const priceInEur = priceInUsd * usdToEurRate;
+        
+                        content += `<li><strong>Bitcoin (BTC)</strong>: ${priceInEur.toFixed(2)} EUR 
+                            <span class="${changeInPercentage >= 0 ? 'positive' : 'negative'}">
+                                (${changeInPercentage >= 0 ? '+' : ''}${changeInPercentage.toFixed(2)}%)
+                            </span></li>`;
+                    } else {
+                        content += '<li>Erreur lors de la récupération des données de Bitcoin.</li>';
+                    }
+        
+                    // Requête pour Ethereum (ETH)
+                    fetch(`https://finnhub.io/api/v1/quote?symbol=BINANCE:ETHUSDT&token=${apiKey}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Données Ethereum:', data); // Débogage pour vérifier les données
+        
+                            // Vérification si les données sont valides
+                            if (data && data.c) {
+                                const priceInUsdEth = data.c; // Prix d'Ethereum en USD
+                                const changeInPercentageEth = data.dp; // Changement en pourcentage d'Ethereum
+        
+                                // Conversion du prix d'Ethereum en EUR
+                                const priceInEurEth = priceInUsdEth * usdToEurRate;
+        
+                                content += `<li><strong>Ethereum (ETH)</strong>: ${priceInEurEth.toFixed(2)} EUR 
+                                <span class="${changeInPercentageEth >= 0 ? 'positive' : 'negative'}">
+                                    (${changeInPercentageEth >= 0 ? '+' : ''}${changeInPercentageEth.toFixed(2)}%)
+                                </span></li>`;
+                            } else {
+                                content += '<li>Erreur lors de la récupération des données d\'Ethereum.</li>';
+                            }
+        
+                            // Ajouter le taux de conversion USD -> EUR
+                            content += `<li><strong>1 USD</strong>: ${usdToEurRate} EUR</li>`;
+        
+                            content += '</ul>'; // Fin de la liste
+        
+                            // Mettre à jour le DOM avec le contenu
+                            document.getElementById('crypto-data').innerHTML = content;
+                        })
+                        .catch(error => {
+                            console.error('Erreur lors de la requête Ethereum:', error);
+                            document.getElementById('crypto-data').innerHTML = 'Erreur lors de la récupération des données d\'Ethereum.';
+                        });
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la requête Bitcoin:', error);
+                    document.getElementById('crypto-data').innerHTML = 'Erreur lors de la récupération des données de Bitcoin.';
+                });
+        }
+    </script>
+    
+
 {% endblock %}

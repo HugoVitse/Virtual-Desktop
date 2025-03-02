@@ -25,21 +25,28 @@
     <!-- Navbar fixée en bas -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-bottom">
         <div class="navbar-container">
-            <a href="/desktop" class="navbar-logo">
+            <div onclick="toggleStartMenu()" class="navbar-logo">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Windows_logo_-_2012.png" alt="Logo" class="logo" />
-            </a>
-            <a href="/desktop" class="nav-link">
+            </div>
+            <div onclick="openExplorer('{{ csrf_token }}')" class="nav-link">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Windows_10_File_Explorer_icon.png" alt="LogoExplorer" class="logo" />
-            </a>
+            </div>
             <a href="/desktop" class="nav-link">
                 <img src="https://img.icons8.com/?size=512&id=kzZctsAbGur5&format=png" alt="LogoAgenda" class="logo" />
             </a>
             <button onclick="toggleTerminal()" class="toggle-terminal-btn nav-link">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Windows_Terminal_logo.svg/1200px-Windows_Terminal_logo.svg.png" alt="LogoTerminal" class="logo" />
             </button>
-            <a href="/desktop" class="nav-link">
+            <div onclick="redirectToWeatherPage()" class="nav-link">
                 <img src="https://img.icons8.com/?size=512&id=qA3w9Yp2vY7r&format=png" alt="LogoMeteo" class="logo" />
-            </a>
+            </div>
+            <div class="nav-link" onclick="toggleCalendar()">
+                <img src="{% static 'icons/calendrier.png' %}" alt="Agenda" class="logo">
+            </div>
+
+            <div class="nav-link" onclick="toggleBourse()">
+                <img src="{% static 'icons/bourse.png' %}" alt="Bourse" class="logo">
+            </div>
         </div>
     </nav>
 {% endblock %}
