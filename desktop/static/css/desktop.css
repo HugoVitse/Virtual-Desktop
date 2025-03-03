@@ -292,32 +292,18 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Styles pour le calendrier dans le coin inférieur droit */
-.calendar-modal {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
-    z-index: 1001;
-    display: none;
-    width: 250px;
-    max-height: 300px;
-    overflow-y: auto;
-}
 
 /* Styles de base */
 .calendar-modal {
     position: fixed;
-    bottom: 10px;
+    overflow-y: auto;
+    bottom: 80px;
     right: 10px;
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     padding: 10px;
-    width: 300px;
+    width: 325px;
     display: none; /* Cacher par défaut */
 }
 
@@ -428,15 +414,6 @@ button {
     border-radius: 3px;
 }
 
-.calendar-modal {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    background: white;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-}
 
 .calendar-day {
     width: 40px;
@@ -465,7 +442,6 @@ button {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 180px;
     z-index: 999;
     cursor: pointer;
 }
@@ -663,7 +639,7 @@ ul li {
 .bourse-modal {
     display: none;
     position: fixed;
-    bottom: 20px;
+    bottom: 80px;
     right: 20px;
     width: 300px; /* Augmenté pour plus de confort */
     background: rgba(20, 20, 20, 0.9);
