@@ -19,7 +19,7 @@
 {% block content %}
     <div class="desktop">
         {% for file in files %}
-            {% if file.name|slice:":9" == "/Desktop/" %}
+            {% if file.name|slice:":8" == "Desktop/" %}
                 <div class="file-icon" ondblclick="openFile('{{ file.id }}','{{ file.file_type }}', '{{ file.name }}', '{{ csrf_token }}')" onclick="selectIcon(this)">
                     <img src="{% static 'icons/' %}{{ file.file_type }}.png" alt="{{ file.file_type }}">
                     <div class="file-name">{{ file.name|basename }}</div>
@@ -32,6 +32,11 @@
         <div class="file-icon" ondblclick="openExplorer('{{ csrf_token }}')"  onclick="selectIcon(this)">
             <img src="{% static 'icons/explorer.png' %}" alt="Explorateur">
             <div class="file-name">Explorateur</div>
+        </div>
+
+        <div class="file-icon">
+            <img src="{% static 'icons/ordre-du-jour.png' %}" alt="Chatbot" onclick="toggleAgenda()">
+            <div class="file-name">Agenda</div>
         </div>
 
         <div class="file-icon" ondblclick="openChatbot()"  onclick="selectIcon(this)">
@@ -138,10 +143,7 @@
             </div>
         </div>
 
-        <div>
-            <img src="{% static 'icons/ordre-du-jour.png' %}" alt="Ordre du jour" class="order-icon" onclick="toggleAgenda()">
-        </div>
-        
+    
         <!-- Section Agenda -->
         <div id="agenda-content" class="agenda-content {% if show_agenda %}show{% endif %}">
             <img src="{% static 'icons/proche.png' %}" alt="Fermer" class="close-icon" onclick="closeAgenda()">
